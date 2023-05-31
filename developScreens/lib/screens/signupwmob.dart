@@ -1,4 +1,5 @@
 import 'package:developscreens/commonUI.dart';
+import 'package:developscreens/commonfonts.dart';
 import 'package:developscreens/logoimage.dart';
 import 'package:developscreens/screens/otpphone.dart';
 import 'package:flutter/material.dart';
@@ -23,18 +24,20 @@ class _MobileLogState extends State<MobileLog> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final buttonHeight = screenSize.height * 0.06;
     return CommonUI(
       children: [
             const LogoImage(),
-            const Text(
-              'Sign up',
+            const AutoFontSizeWidget(
+              text:'Sign up',
               style: TextStyle(
-                fontSize: 27,
+                fontSize: 25,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const Text(
-              'My name is mandeep, hello login',
+            const AutoFontSizeWidget(
+              text:'My name is mandeep, hello login',
               style: TextStyle(
                 fontSize: 15,
               ),
@@ -114,32 +117,35 @@ class _MobileLogState extends State<MobileLog> {
               ),
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const OtpVerify()),
-                );
+            Container(
+              height: buttonHeight,
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const OtpVerify()),
+                  );
 
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xEDE51D23),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xEDE51D23),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              child: const ListTile(
-                title: Center(
-                  child: Text(
-                    'Continue',
+                child:
+                  AutoFontSizeWidget(
+                    text: 'Continue',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
+                      fontSize: 18
                     ),
                   ),
                 ),
               ),
-            ),
+
             const SizedBox(height: 20),
           ],
     );

@@ -1,6 +1,8 @@
 import 'package:developscreens/commonUI.dart';
+import 'package:developscreens/commonfonts.dart';
 import 'package:developscreens/logoimage.dart';
 import 'package:developscreens/screens/Smail.dart';
+import 'package:developscreens/screens/signin.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -16,8 +18,9 @@ class _MailLoginState extends State<MailLogin> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
     final double containerWidth = MediaQuery.of(context).size.width * 0.9;
-
+    final textFormFieldHeight = screenSize.height * 0.06;
     return CommonUI(
           footer:Container(
         padding: const EdgeInsets.symmetric(vertical: 3),
@@ -32,7 +35,7 @@ class _MailLoginState extends State<MailLogin> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const MailLogin()),
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
               child: RichText(
@@ -47,8 +50,8 @@ class _MailLoginState extends State<MailLogin> {
       ) ,
           children: [
             const LogoImage(),
-            const Text(
-              'Sign up',
+            const AutoFontSizeWidget(
+              text:'Sign up',
               style: TextStyle(
                 fontSize: 25,
                 fontWeight: FontWeight.w600,
@@ -56,6 +59,7 @@ class _MailLoginState extends State<MailLogin> {
             ),
             const SizedBox(height: 20),
             SizedBox(
+              height: textFormFieldHeight,
               width: containerWidth,
               child: TextFormField(
                 decoration: InputDecoration(
@@ -91,6 +95,7 @@ class _MailLoginState extends State<MailLogin> {
             const SizedBox(height: 20),
             SizedBox(
               width: containerWidth,
+              height: textFormFieldHeight,
               child: TextFormField(
                 decoration: InputDecoration(
                   label: RichText(
@@ -125,6 +130,7 @@ class _MailLoginState extends State<MailLogin> {
             const SizedBox(height: 20),
             SizedBox(
               width: containerWidth,
+              height: textFormFieldHeight,
               child: TextFormField(
                 obscureText: true,
                 decoration: InputDecoration(
@@ -184,74 +190,77 @@ class _MailLoginState extends State<MailLogin> {
                   ),
                 ),
 
-                RichText(
-                  text: TextSpan(
-                    style:
-                        const TextStyle(fontSize: 13, color: Colors.black),
-                    children: [
-                      const TextSpan(
-                        text:
-                            'By clicking Create Account you agree to the\n ',
-                      ),
-                      TextSpan(
-                        text: 'Terms and Conditions',
-                        style: const TextStyle(
-                          color: Colors.red,
-                          decoration: TextDecoration.underline,
+                Container(
+                  width: 250, // Adjust the width according to your needs
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                      children: [
+                        const TextSpan(
+                          text: 'By clicking Create Account you agree to the ',
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
+                        TextSpan(
+                          text: 'Terms and Conditions',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()..onTap = () {
                             // Handle Terms and Conditions tap
                           },
-                      ),
-                      const TextSpan(
-                        text: ' and ',
-                      ),
-                      TextSpan(
-                        text: 'Privacy Policy.',
-                        style: const TextStyle(
-                          color: Colors.red,
-                          decoration: TextDecoration.underline,
                         ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
+                        const TextSpan(text: ' and '),
+                        TextSpan(
+                          text: 'Privacy Policy.',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            decoration: TextDecoration.underline,
+                          ),
+                          recognizer: TapGestureRecognizer()..onTap = () {
                             // Handle Privacy Policy tap
                             print("j");
                           },
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
+
+
               ],
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return const VerificationPopup();
-                  },
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xEDE51D23),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            Container(
+              height: textFormFieldHeight,
+              width: double.infinity,
+              child: ElevatedButton(
+
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const VerificationPopup();
+                    },
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+
+                  backgroundColor: const Color(0xEDE51D23),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              child: const ListTile(
-                title: Center(
-                  child: Text(
-                    'Continue',
+                child: AutoFontSizeWidget(
+                    text:'Continue',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
+                      fontSize: 18,
                     ),
                   ),
                 ),
               ),
-            ),
+
             const SizedBox(height: 20),
           ],
     );

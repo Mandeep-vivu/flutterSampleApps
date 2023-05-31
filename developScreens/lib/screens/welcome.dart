@@ -1,3 +1,4 @@
+import 'package:developscreens/commonfonts.dart';
 import 'package:developscreens/logoimage.dart';
 import 'package:developscreens/screens/signin.dart';
 import 'package:developscreens/screens/signupwmail.dart';
@@ -17,9 +18,8 @@ class WelcomeS extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'You have already account?',
-              style: TextStyle(fontSize: 14),
+            const AutoFontSizeWidget(
+              style: TextStyle(fontSize: 14), text: 'You have already account?'
             ),
             GestureDetector(
               onTap: () {
@@ -70,12 +70,12 @@ class WelcomeS extends StatelessWidget {
                     Icons.phone,
                     color: Colors.white,
                   ),
-                  title: Text(
-                    'Continue with Phone',
+                  title: AutoFontSizeWidget(
                     style: TextStyle(
+                      fontSize: 15,
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
-                    ),
+                    ), text: 'Continue with Phone',
                   ),
                 ),
               ),
@@ -94,12 +94,12 @@ class WelcomeS extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8))),
                 child: ListTile(
                   leading: Image.asset('assets/google.png'),
-                  title: const Text(
-                    'Continue with Google',
+                  title: AutoFontSizeWidget(
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
-                    ),
+                      fontSize: 15,
+                    ), text: 'Continue with Google',
                   ),
                 ),
               ),
@@ -114,14 +114,17 @@ class WelcomeS extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8))),
                 child: ListTile(
                   leading: Image.asset('assets/facebook.png'),
-                  title: const Text(
-                    'Continue with Facebook',
+                  title: AutoFontSizeWidget(
+                    text: 'Continue with Facebook',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w500,
+                      fontSize: 15,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
+
               ),
               const SizedBox(height: 10,),
             ],

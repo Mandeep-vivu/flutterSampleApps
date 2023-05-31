@@ -8,10 +8,14 @@ class LogoImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final desiredWidth = screenSize.width * 0.4; // Adjust the multiplier as needed
+    final desiredHeight = screenSize.height * 0.2;
     return Image.asset(
       'assets/logo.png',
-      height: height,
-      width: width,
+      width: desiredWidth,
+      height: desiredHeight,
+
     );
   }
 }

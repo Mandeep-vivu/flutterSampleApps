@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "387726903725",
+    "firebase_url": "https://developscreens-ddb84-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "developscreens-ddb84",
+    "storage_bucket": "developscreens-ddb84.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:387726903725:android:225f93934afe7a62e13924",
+        "android_client_info": {
+          "package_name": "com.example.developscreens"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkcfcGxx0mVljwcyY6sHiR1ai-dLm6LgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

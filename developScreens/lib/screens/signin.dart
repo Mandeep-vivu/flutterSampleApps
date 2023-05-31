@@ -1,4 +1,5 @@
 import 'package:developscreens/commonUI.dart';
+import 'package:developscreens/commonfonts.dart';
 import 'package:developscreens/screens/ForgetPas.dart';
 import 'package:developscreens/screens/welcome.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,8 @@ class LoginPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final buttonHeight = screenSize.height * 0.06;
     final double containerWidth = MediaQuery.of(context).size.width * 0.9;
     return CommonUI(
   backButton:   Align(
@@ -53,18 +56,18 @@ class LoginPage extends StatelessWidget {
               height: 150,
               width: 150,
             ),
-            const Text(
-              'Welcome Back',
+            const AutoFontSizeWidget(
+              text:'Welcome Back',
               style: TextStyle(
-                fontSize: 27,
+                fontSize: 25,
                 fontWeight: FontWeight.w600,
               ),
             ),
-
-            const Text("Please login in to your account",style: TextStyle(color: Colors.black54,fontSize: 17),),
+            const AutoFontSizeWidget(text:"Please login in to your account",style: TextStyle(color: Colors.black54,fontSize: 17),),
             const SizedBox(height: 30),
             SizedBox(
               width: containerWidth,
+              height: buttonHeight,
               child: TextFormField(
                 decoration: const InputDecoration(
                   labelText: "Email/Phone",
@@ -87,6 +90,7 @@ class LoginPage extends StatelessWidget {
 
             SizedBox(
               width: containerWidth,
+              height: buttonHeight,
               child: TextFormField(
                 obscureText: true,
                 decoration: const InputDecoration(
@@ -107,7 +111,7 @@ class LoginPage extends StatelessWidget {
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             Align(
               alignment: Alignment.centerRight,
               child: GestureDetector(
@@ -120,29 +124,31 @@ class LoginPage extends StatelessWidget {
                 child: const Text("Forgot Password?",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500),),
               ),
             ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
+            const SizedBox(height: 20),
+            Container(
+              width: double.infinity,
+              height: buttonHeight,
+              child: ElevatedButton(
+                onPressed: () {
 
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xEDE51D23),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xEDE51D23),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              child: const ListTile(
-                title: Center(
-                  child: Text(
-                    'Sign In',
+                child:  AutoFontSizeWidget(
+                    text:'Sign In',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
+                      fontSize: 18
                     ),
                   ),
                 ),
               ),
-            ),
+
             const SizedBox(height: 20),
           ],
     );

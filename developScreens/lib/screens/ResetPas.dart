@@ -1,4 +1,5 @@
 import 'package:developscreens/commonUI.dart';
+import 'package:developscreens/commonfonts.dart';
 import 'package:developscreens/logoimage.dart';
 import 'package:flutter/material.dart';
 
@@ -7,26 +8,42 @@ class ResetPasswordPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final buttonHeight = screenSize.height * 0.06; // Adjust the multiplier as needed
+    final textFormFieldHeight = screenSize.height * 0.06; // Adjust the multiplier as needed
+    final sizedBoxHeight = screenSize.height * 0.03; // Adjust the multiplier as needed
+
     return CommonUI(
+      backButton:  Align(
+        alignment: Alignment.topLeft,
+        child: IconButton(onPressed: (){
+          Navigator.pop(
+            context,
+
+          );
+        },
+          icon: const Icon(Icons.arrow_back),),
+      ),
       children: [
         const LogoImage(),
         const Text(
           'Reset password?',
           style: TextStyle(
-            fontSize: 27,
+            fontSize: 23,
             fontWeight: FontWeight.w600,
           ),
         ),
-        const Text(
-          'Please enter your new password',
+        const AutoFontSizeWidget(
+          text: 'Please enter your new password',
           style: TextStyle(
             fontSize: 16,
           ),
         ),
-        const SizedBox(
-          height: 40,
+        SizedBox(
+          height: sizedBoxHeight,
         ),
         SizedBox(
+          height: textFormFieldHeight,
           child: TextFormField(
             decoration: const InputDecoration(
               labelText: 'New Password',
@@ -45,8 +62,9 @@ class ResetPasswordPage extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: 30),
+        SizedBox(height: sizedBoxHeight),
         SizedBox(
+          height: textFormFieldHeight,
           child: TextFormField(
             decoration: const InputDecoration(
               labelText: 'Confirm New Password',
@@ -65,9 +83,9 @@ class ResetPasswordPage extends StatelessWidget {
             },
           ),
         ),
-        const SizedBox(height: 30),
+        SizedBox(height: sizedBoxHeight),
         Container(
-          height: 55,
+          height: buttonHeight,
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
@@ -82,13 +100,13 @@ class ResetPasswordPage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text(
-              "Submit",
-              style: TextStyle(color: Colors.white, fontSize: 19),
+            child: AutoFontSizeWidget(
+              text:"Submit",
+              style: TextStyle(color: Colors.white, fontSize: 18),
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: sizedBoxHeight),
       ],
     );
   }

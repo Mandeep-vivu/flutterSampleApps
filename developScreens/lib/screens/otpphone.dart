@@ -1,4 +1,5 @@
 import 'package:developscreens/commonUI.dart';
+import 'package:developscreens/commonfonts.dart';
 import 'package:developscreens/logoimage.dart';
 import 'package:developscreens/screens/welcome.dart';
 import 'package:flutter/material.dart';
@@ -66,12 +67,14 @@ class _OtpVerifyState extends State<OtpVerify> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final buttonHeight = screenSize.height * 0.08;
     return CommonUI(
           children: [
             const LogoImage(),
             const SizedBox(height: 16),
-            const Text(
-              'Enter the code just sent to:',
+            const AutoFontSizeWidget(
+              text:'Enter the code just sent to:',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700
@@ -83,8 +86,8 @@ class _OtpVerifyState extends State<OtpVerify> {
               children: List.generate(
                 4,
                     (index) => Container(
-                  width: 68,
-                  height: 67,
+                  width:buttonHeight,
+                  height: buttonHeight,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     border: Border.all(
@@ -120,8 +123,8 @@ class _OtpVerifyState extends State<OtpVerify> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text(
-                  'Didn\'t get a Text? ',
+                const AutoFontSizeWidget(
+                  text:'Didn\'t get a Text? ',
                   style: TextStyle(fontSize: 19,color: Colors.grey),
                 ),
                 GestureDetector(
@@ -147,9 +150,9 @@ class _OtpVerifyState extends State<OtpVerify> {
                   MaterialPageRoute(builder: (context) => const WelcomeS()),
                 );
               },
-              child: const Text("Login in another way",style: TextStyle(
+              child: AutoFontSizeWidget(text:"Login in another way",style: TextStyle(
                   color: Colors.black,
-                  fontSize: 19,
+                  fontSize: 20,
                   decoration: TextDecoration.underline,
                   fontWeight: FontWeight.w700),),
             )

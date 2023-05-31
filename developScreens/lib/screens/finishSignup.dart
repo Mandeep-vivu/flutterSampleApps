@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:developscreens/commonUI.dart';
+import 'package:developscreens/commonfonts.dart';
 import 'package:developscreens/logoimage.dart';
 import 'package:developscreens/screens/signin.dart';
 import 'package:flutter/material.dart';
@@ -31,13 +32,15 @@ class _FinishSupState extends State<FinishSup> {
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final buttonHeight = screenSize.height * 0.06;
     return CommonUI(
       children: [
         const LogoImage(),
-        const Text(
-          'Finish signing up',
+        const AutoFontSizeWidget(
+          text:'Finish signing up',
           style: TextStyle(
-            fontSize: 27,
+            fontSize: 25,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -57,15 +60,15 @@ class _FinishSupState extends State<FinishSup> {
                   ),
                 ),
                 child: CircleAvatar(
-                  radius: 50,
+                  radius: 70,
                   backgroundImage: _imageFile != null
                       ? FileImage(_imageFile!)
                       : null,
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
-                "Upload profile picture",
+              const AutoFontSizeWidget(
+                text:"Upload profile picture",
                 style: TextStyle(fontSize: 18, color: Colors.red),
               ),
             ],
@@ -73,7 +76,7 @@ class _FinishSupState extends State<FinishSup> {
         ),
         const SizedBox(height: 20),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
+          height: buttonHeight,
           width: double.infinity,
           child: ElevatedButton(
               onPressed: () {
@@ -91,7 +94,7 @@ class _FinishSupState extends State<FinishSup> {
                     borderRadius: BorderRadius.circular(8))
                 ,
               ),
-              child: const Text("Sign Up",style: TextStyle(color: Colors.white),)
+              child: AutoFontSizeWidget(text:"Sign Up",style: TextStyle(color: Colors.white,fontSize: 18),)
           ),
         ),
         const SizedBox(height: 20),

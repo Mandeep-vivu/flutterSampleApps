@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+
 class CommonUI extends StatelessWidget {
   final List<Widget> children;
   final Widget? footer;
   final Widget? backButton;
+  final double? sizedBoxHeight; // New property for SizedBox height
 
   const CommonUI({
     Key? key,
     required this.children,
     this.footer,
     this.backButton,
+    this.sizedBoxHeight, // Initialize the new property
   }) : super(key: key);
 
   @override
@@ -34,8 +37,8 @@ class CommonUI extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-
                           ...children,
+                          if (sizedBoxHeight != null) SizedBox(height: sizedBoxHeight), // Add the SizedBox with dynamic height
                         ],
                       ),
                     ],
