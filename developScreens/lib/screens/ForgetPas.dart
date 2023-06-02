@@ -23,7 +23,7 @@ class ForgetPas extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),),
       ),
       children: [
-        const LogoImage(),
+        LogoImage(),
         const AutoFontSizeWidget(
           text: 'Forgotten your password?',
           style: TextStyle(

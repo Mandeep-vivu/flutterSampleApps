@@ -1,3 +1,5 @@
+import 'package:developscreens/commons/heading.dart';
+import 'package:developscreens/responSized.dart';
 import 'package:developscreens/screens/finishSignup.dart';
 import 'package:flutter/material.dart';
 
@@ -5,9 +7,13 @@ class MailDone extends StatelessWidget {
   const MailDone({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context)  {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final scaleFactor =
+        screenHeight / 790; // 812 is the reference screen height
+    final buttonHeight = 145 * scaleFactor;
     return Scaffold(
-      backgroundColor: const Color(0xfffaeaea),
+      backgroundColor: const Color(0xfffff9f9),
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
@@ -15,11 +21,6 @@ class MailDone extends StatelessWidget {
               context,
               MaterialPageRoute(builder: (context) => const FinishSup()),
             );
-            /*Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const LoginPage()),
-                  (Route<dynamic> route) => false,
-            );*/
           },
           child: Column(
             children: [
@@ -27,8 +28,8 @@ class MailDone extends StatelessWidget {
                 child: Center(
                   child: Container(
                     width: MediaQuery.of(context).size.width * 0.9,
-                    padding: const EdgeInsets.symmetric(vertical: 16,horizontal: 21),
-
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 21),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -37,18 +38,24 @@ class MailDone extends StatelessWidget {
                         Container(
                             decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                border: Border.all(color: const Color(0xEDEF9BA2),width: 20),
-                                color: const Color(0xEDE51D23)
-                            ),
-                            child: const Icon(Icons.check,size: 120,color: Colors.white,)),
-                        const SizedBox(height: 25,),
-                        const Text("Your Mail has successfully verified!",
-                          style: TextStyle(
-                              color: Colors.grey,
-                              fontSize: 22,
-                              fontWeight: FontWeight.w500
-                          ),
-                          textAlign: TextAlign.center,)
+                                border: Border.all(
+                                    color: const Color(0xEDEF9BA2), width: 20),
+                                color: const Color(0xEDE51D23)),
+                            child: Icon(
+                              Icons.check,
+                              size: buttonHeight,
+                              color: Colors.white,
+                            )),
+                        ResponsiveSizedBox(
+                          height: 28,
+                        ),
+                        HeadingWidget(
+                          text: "Your Mail has successfully verified!",
+                          fontSize: 18,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.normal,
+                          textAlign: TextAlign.center,
+                        ),
                       ],
                     ),
                   ),

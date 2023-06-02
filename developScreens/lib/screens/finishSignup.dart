@@ -36,7 +36,7 @@ class _FinishSupState extends State<FinishSup> {
     final buttonHeight = screenSize.height * 0.06;
     return CommonUI(
       children: [
-        const LogoImage(),
+        LogoImage(),
         const AutoFontSizeWidget(
           text:'Finish signing up',
           style: TextStyle(

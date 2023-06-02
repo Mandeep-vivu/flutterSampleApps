@@ -11,16 +11,16 @@ class AutoFontSizeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
-    final screenWidth = mediaQuery.size.width;
-
-    // Calculate the desired font size based on the screen width
-    final scaleFactor = screenWidth / 400; // 375 is the reference screen width
-    final fontSize = style.fontSize! * scaleFactor;
+      final mediaQuery = MediaQuery.of(context);
+      final screenWidth = mediaQuery.size.width;
+      // Calculate the desired font size based on the screen width
+      final scaleFactor = screenWidth / 375; // 375 is the reference screen width
+      final fontSize = style.fontSize! * scaleFactor;
 
     return Text(
       text,
-      style: style.copyWith(fontSize: fontSize),
+      style: style.copyWith(fontSize: fontSize,fontFamily: 'Open Sans',
+      ),
     );
   }
 }

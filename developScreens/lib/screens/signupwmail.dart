@@ -49,7 +49,7 @@ class _MailLoginState extends State<MailLogin> {
         ),
       ) ,
           children: [
-            const LogoImage(),
+            LogoImage(),
             const AutoFontSizeWidget(
               text:'Sign up',
               style: TextStyle(

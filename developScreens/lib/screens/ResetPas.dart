@@ -25,7 +25,7 @@ class ResetPasswordPage extends StatelessWidget {
           icon: const Icon(Icons.arrow_back),),
       ),
       children: [
-        const LogoImage(),
+        LogoImage(),
         const Text(
           'Reset password?',
           style: TextStyle(
