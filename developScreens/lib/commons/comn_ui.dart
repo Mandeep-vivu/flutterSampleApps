@@ -1,4 +1,4 @@
-import 'package:developscreens/responSized.dart';
+import 'package:developscreens/commons/resp_sizebox.dart';
 import 'package:flutter/material.dart';
 
 class CommonUI extends StatelessWidget {
@@ -25,16 +25,24 @@ class CommonUI extends StatelessWidget {
             if (backButton != null) backButton!,
             Expanded(
               child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.white,
+                child: SingleChildScrollView(
+                  physics: const NeverScrollableScrollPhysics(),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.4),
+                          offset: const Offset(0, 10),
+                          blurRadius: 40,
+                        ),
+                      ],
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white,
                // Replace with desired color
-                  ),
-                  width: containerWidth,
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
+                    ),
+                    width: containerWidth,
+                    padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 24),
 
-                  child: SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -47,9 +55,9 @@ class CommonUI extends StatelessWidget {
                 ),
               ),
             ),
-
+            const ResponsiveSizedBox(height: 12,),
             if (footer != null) footer!,
-            ResponsiveSizedBox(height: 23,)
+            const ResponsiveSizedBox(height: 12,)
           ],
         ),
       ),

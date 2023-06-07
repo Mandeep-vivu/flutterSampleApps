@@ -1,47 +1,48 @@
+import 'package:developscreens/commons/resp_container.dart';
+import 'package:developscreens/commons/heading_text.dart';
+import 'package:developscreens/commons/resp_sizebox.dart';
 import 'package:flutter/material.dart';
-import 'package:developscreens/commonUI.dart';
-import 'package:developscreens/commonfonts.dart';
-import 'package:developscreens/logoimage.dart';
-import 'ResetPas.dart';
+import 'package:developscreens/commons/comn_ui.dart';
+import 'package:developscreens/commons/logo_image.dart';
+import 'reset_pswd.dart';
 
 class ForgetPas extends StatelessWidget {
   const ForgetPas({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-    final buttonHeight = screenSize.height * 0.06;
+
     return CommonUI(
-      backButton:  Align(
+      /* backButton:  Align(
         alignment: Alignment.topLeft,
         child: IconButton(onPressed: (){
           Navigator.pop(
             context,
-
           );
         },
           icon: const Icon(Icons.arrow_back),),
-      ),
+      ),*/
       children: [
-        LogoImage(),
-        const AutoFontSizeWidget(
-          text: 'Forgotten your password?',
-          style: TextStyle(
-            fontSize: 23,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        AutoFontSizeWidget(
-          text:'Please enter your email',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        SizedBox(
+        const LogoImage(),
+        const ResponsiveSizedBox(
           height: 30,
         ),
-        SizedBox(
-          height: buttonHeight,
+        const HeadingWidget(
+          text: 'Forgotten your password?',
+        ),
+        const ResponsiveSizedBox(
+          height: 6,
+        ),
+        const HeadingWidget(
+          text: 'Please enter your email',
+          fontWeight: FontWeight.normal,
+          color: Color(0xff626064),
+          fontSize: 14,
+        ),
+        const ResponsiveSizedBox(
+          height: 30,
+        ),
+        Form(
           child: TextFormField(
             decoration: InputDecoration(
               label: RichText(
@@ -64,15 +65,16 @@ class ForgetPas extends StatelessWidget {
             },
           ),
         ),
-        SizedBox(height: 30),
-        Container(
-          height: buttonHeight,
-          width: double.infinity,
+        const ResponsiveSizedBox(
+          height: 20,
+        ),
+        ResponsiveContainer(
           child: ElevatedButton(
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const ResetPasswordPage()),
+                MaterialPageRoute(
+                    builder: (context) => const ResetPasswordPage()),
               );
             },
             style: ElevatedButton.styleFrom(
@@ -81,13 +83,13 @@ class ForgetPas extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: AutoFontSizeWidget(
-              text:"Send Reset link",
-              style: TextStyle(color: Colors.white, fontSize: 18),
+            child: const HeadingWidget(
+              text: "Send Reset link",
+             color: Colors.white,
+              fontSize: 16,
             ),
           ),
         ),
-        SizedBox(height: 20),
       ],
     );
   }

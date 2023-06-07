@@ -1,25 +1,61 @@
-import 'package:developscreens/commons/heading.dart';
-import 'package:developscreens/responSized.dart';
-import 'package:developscreens/screens/finishSignup.dart';
+import 'dart:async';
+
+import 'package:developscreens/commons/heading_text.dart';
+import 'package:developscreens/commons/resp_sizebox.dart';
+import 'package:developscreens/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 
-class MailDone extends StatelessWidget {
+
+class MailDone extends StatefulWidget {
   const MailDone({Key? key}) : super(key: key);
 
   @override
+  State<MailDone> createState() => _MailDoneState();
+}
+
+class _MailDoneState extends State<MailDone> {
+  late Timer _timer;
+  @override
+  void initState() {
+    super.initState();
+
+    // Start the timer when the widget is initialized
+   _timer= Timer(Duration(seconds: 2), () {
+      /*Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );*/
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context){
+        return LoginPage();
+      }), (r){
+        return false;
+      });
+    });
+  }
+  @override
+  void dispose() {
+    // Cancel the timer in the dispose method
+    _timer.cancel();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context)  {
+    print(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final scaleFactor =
         screenHeight / 790; // 812 is the reference screen height
     final buttonHeight = 145 * scaleFactor;
+
+
+
     return Scaffold(
       backgroundColor: const Color(0xfffff9f9),
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const FinishSup()),
+              MaterialPageRoute(builder: (context) =>  LoginPage()),
             );
           },
           child: Column(
@@ -46,10 +82,10 @@ class MailDone extends StatelessWidget {
                               size: buttonHeight,
                               color: Colors.white,
                             )),
-                        ResponsiveSizedBox(
+                        const ResponsiveSizedBox(
                           height: 28,
                         ),
-                        HeadingWidget(
+                        const HeadingWidget(
                           text: "Your Mail has successfully verified!",
                           fontSize: 18,
                           color: Colors.grey,

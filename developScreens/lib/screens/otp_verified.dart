@@ -1,10 +1,37 @@
-import 'package:developscreens/commons/heading.dart';
-import 'package:developscreens/responSized.dart';
-import 'package:developscreens/screens/finishSignup.dart';
+import 'dart:async';
+
+import 'package:developscreens/commons/heading_text.dart';
+import 'package:developscreens/commons/resp_sizebox.dart';
+import 'package:developscreens/screens/profile_pic.dart';
 import 'package:flutter/material.dart';
 
-class PhoneDone extends StatelessWidget {
+class PhoneDone extends StatefulWidget {
   const PhoneDone({Key? key}) : super(key: key);
+
+  @override
+  State<PhoneDone> createState() => _PhoneDoneState();
+}
+
+class _PhoneDoneState extends State<PhoneDone> {
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // Start the timer when the widget is initialized
+    _timer = Timer(Duration(seconds: 2), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const FinishSup()),
+      );
+    });
+  }
+  @override
+  void dispose() {
+    // Cancel the timer in the dispose method
+    _timer.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,12 +39,13 @@ class PhoneDone extends StatelessWidget {
     final scaleFactor =
         screenHeight / 790; // 812 is the reference screen height
     final buttonHeight = 145 * scaleFactor;
+
     return Scaffold(
       backgroundColor: const Color(0xfffff9f9),
       body: SafeArea(
         child: GestureDetector(
           onTap: () {
-            Navigator.push(
+            Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const FinishSup()),
             );
@@ -46,10 +74,10 @@ class PhoneDone extends StatelessWidget {
                               size: buttonHeight,
                               color: Colors.white,
                             )),
-                        ResponsiveSizedBox(
+                        const ResponsiveSizedBox(
                           height: 28,
                         ),
-                        HeadingWidget(
+                        const HeadingWidget(
                           text: "Your Phone number has successfully verified!",
                           fontSize: 18,
                           color: Colors.grey,

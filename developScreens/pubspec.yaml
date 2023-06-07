@@ -39,6 +39,13 @@ dependencies:
   firebase_auth: ^4.6.1
   firebase_dynamic_links: ^5.3.1
 
+  google_fonts: ^4.0.4
+
+  intl_phone_field: ^3.1.0
+  intl_phone_number_input: ^0.7.3+1
+  country_picker: ^2.0.20
+
+
 
 dev_dependencies:
   flutter_test:
@@ -74,6 +81,12 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+
+  fonts:
+    - family: OpenSans
+      fonts:
+        - asset: fonts/OpenSans-VariableFont_wdth,wght.ttf
+          weight: 700
   # fonts:
   #   - family: Schyler
   #     fonts:

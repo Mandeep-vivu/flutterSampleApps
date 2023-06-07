@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 class ResponsiveContainer extends StatelessWidget {
@@ -8,7 +9,7 @@ class ResponsiveContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    final scaleFactor = screenHeight / 790; // 812 is the reference screen height
+    final scaleFactor = screenHeight / 785; // 812 is the reference screen height
     final buttonHeight = 44 * scaleFactor;
     return SizedBox(
       height: buttonHeight,

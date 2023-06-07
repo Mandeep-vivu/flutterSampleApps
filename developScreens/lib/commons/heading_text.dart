@@ -20,7 +20,7 @@ class HeadingWidget extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontFamily: 'Open Sans',
+        fontFamily: 'OpenSans',
         fontWeight: fontWeight ?? FontWeight.w600,
         fontSize: desiredFontSize,
         color: color ?? Colors.black,

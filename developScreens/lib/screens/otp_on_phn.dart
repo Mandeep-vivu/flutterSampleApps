@@ -1,23 +1,22 @@
-import 'package:developscreens/commonUI.dart';
-import 'package:developscreens/commons/heading.dart';
-import 'package:developscreens/logoimage.dart';
-import 'package:developscreens/responSized.dart';
-import 'package:developscreens/screens/Sphn.dart';
-import 'package:developscreens/screens/welcome.dart';
+import 'package:developscreens/commons/comn_ui.dart';
+import 'package:developscreens/commons/heading_text.dart';
+import 'package:developscreens/commons/logo_image.dart';
+import 'package:developscreens/commons/resp_sizebox.dart';
+import 'package:developscreens/screens/otp_verified.dart';
+import 'package:developscreens/screens/welcome_to_app.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:async';
 
-import 'package:flutter/services.dart'; // Import the services package for clipboard access
+// Import the services package for clipboard access
 class OtpVerify extends StatefulWidget {
   const OtpVerify({
     Key? key,
     required this.mobileNumber,
-    required this.countryCode,
   }) : super(key: key);
 
   final String mobileNumber;
-  final String countryCode;
+
 
   @override
   State<OtpVerify> createState() => _OtpVerifyState();
@@ -27,10 +26,10 @@ class _OtpVerifyState extends State<OtpVerify> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final List<String> _otpCodes = List.generate(4, (_) => '');
   late List<TextEditingController> _controllers;
-  late Timer _timer;
-  int _countdownSeconds = 10;
+  Timer? _timer;
+  int _countdownSeconds = 60;
   bool _isVisible = false;
-
+  bool _isButtonEnabled = true;
   @override
   void initState() {
     super.initState();
@@ -45,28 +44,31 @@ class _OtpVerifyState extends State<OtpVerify> {
     for (var controller in _controllers) {
       controller.dispose();
     }
-    _timer.cancel();
+    _timer?.cancel();
     super.dispose();
   }
 
   void startCountdown() {
     setState(() {
-      _countdownSeconds = 10;
+      _countdownSeconds = 60;
       _isVisible = true;
+      _isButtonEnabled = false; // Disable the button
     });
 
-    const oneSec = const Duration(seconds: 1);
-    _timer = new Timer.periodic(oneSec, (Timer timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
       setState(() {
         if (_countdownSeconds < 1) {
           timer.cancel();
           _isVisible = false;
+          _isButtonEnabled = true; // Enable the button
         } else {
           _countdownSeconds = _countdownSeconds - 1;
         }
       });
     });
   }
+
+
 
   void _onChanged(int index, String value) {
     _otpCodes[index] = value;
@@ -93,7 +95,7 @@ class _OtpVerifyState extends State<OtpVerify> {
         if (isOtpValid) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => PhoneDone()),
+            MaterialPageRoute(builder: (context) => const PhoneDone()),
           );
         }
       }
@@ -111,11 +113,11 @@ class _OtpVerifyState extends State<OtpVerify> {
 
     return CommonUI(
       children: [
-        LogoImage(),
+        const LogoImage(),
         const ResponsiveSizedBox(height: 30),
         HeadingWidget(
           text:
-          'Enter the code just sent to:\n${widget.countryCode} ${widget.mobileNumber}',
+          'Enter the code just sent to:\n${widget.mobileNumber}',
           fontSize: 16,
         ),
         const ResponsiveSizedBox(height: 30),
@@ -134,7 +136,7 @@ class _OtpVerifyState extends State<OtpVerify> {
                     color: Colors.grey,
                     width: 1,
                   ),
-                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  borderRadius: const BorderRadius.all(Radius.circular(6)),
                 ),
                 child: TextFormField(
                   controller: _controllers[index],
@@ -160,40 +162,41 @@ class _OtpVerifyState extends State<OtpVerify> {
             ),
           ),
         ),
-        ResponsiveSizedBox(
+        const ResponsiveSizedBox(
           height: 30,
         ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            HeadingWidget(
-              text: 'Didn\'t get a Text? ',
-              color: Colors.grey,
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-            ),
-            GestureDetector(
-              onTap: () {
-                startCountdown();
-              },
-              child: HeadingWidget(
-                text: 'Send Again',
+        Visibility(
+          visible: !_isVisible,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const HeadingWidget(
+                text: 'Didn\'t get a Text? ',
+                color: Colors.grey,
                 fontSize: 16,
-                underline: true,
+                fontWeight: FontWeight.normal,
               ),
-            ),
-          ],
+              GestureDetector(
+                onTap: _isButtonEnabled ? startCountdown : null,
+                child: const HeadingWidget(
+                  text: 'Send Again',
+                  fontSize: 16,
+                  underline: true,
+                ),
+              ),
+            ],
+          ),
         ),
         Visibility(
           visible: _isVisible,
           child: HeadingWidget(
-            text: 'Code will be received in $_countdownSeconds seconds',
+            text: 'Code will be sent again in $_countdownSeconds seconds',
             fontSize: 12,
             fontWeight: FontWeight.normal,
             color: Colors.redAccent,
           ),
         ),
-        ResponsiveSizedBox(
+        const ResponsiveSizedBox(
           height: 30,
         ),
         GestureDetector(
@@ -203,7 +206,7 @@ class _OtpVerifyState extends State<OtpVerify> {
               MaterialPageRoute(builder: (context) => const WelcomeS()),
             );
           },
-          child: HeadingWidget(
+          child: const HeadingWidget(
             text: "Login in another way",
             fontSize: 16,
             underline: true,
