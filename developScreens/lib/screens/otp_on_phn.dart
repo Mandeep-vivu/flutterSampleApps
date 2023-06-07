@@ -37,6 +37,7 @@ class _OtpVerifyState extends State<OtpVerify> {
       4,
           (_) => TextEditingController(),
     );
+    startCountdown();
   }
 
   @override
