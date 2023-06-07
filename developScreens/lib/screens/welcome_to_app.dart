@@ -3,8 +3,6 @@ import 'package:developscreens/commons/heading_text.dart';
 import 'package:developscreens/commons/logo_image.dart';
 import 'package:developscreens/commons/resp_sizebox.dart';
 import 'package:developscreens/screens/signin_screen.dart';
-import 'package:developscreens/screens/signup_mail.dart';
-import 'package:developscreens/screens/signup_mobile.dart';
 import 'package:flutter/material.dart';
 import 'package:developscreens/commons/comn_ui.dart';
 
@@ -54,49 +52,14 @@ class WelcomeS extends StatelessWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ResponsiveContainer(
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MobileLog()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xEDE51D23),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8))),
-                  child: const Row(
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(14, 0, 14, 0),
-                        child: Icon(
-                          Icons.phone,
-                          color: Colors.white,
-                        ),
-                      ),
-                      HeadingWidget(
-                        text: 'Continue with Phone',
-                        fontSize: 14,
-                        fontWeight: FontWeight.normal,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+
               const ResponsiveSizedBox(
                 height: 12,
               ),
               ResponsiveContainer(
                 child: ElevatedButton(
                     onPressed: () {
-                      // Handle continue with Google button tap
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const MailLogin()),
-                      );
+
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xEDDB4437),
@@ -123,7 +86,7 @@ class WelcomeS extends StatelessWidget {
               ResponsiveContainer(
                 child: ElevatedButton(
                     onPressed: () {
-                      // Handle continue with Google button tap
+
                     },
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF3B5998),
@@ -144,10 +107,7 @@ class WelcomeS extends StatelessWidget {
                         ),
                       ],
                     )
-                    /*ListTile(
-                    leading: ,
-                    title: const
-                  ),*/
+
                     ),
               ),
             ],

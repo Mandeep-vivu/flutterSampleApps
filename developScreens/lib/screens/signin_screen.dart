@@ -4,6 +4,7 @@ import 'package:developscreens/commons/heading_text.dart';
 import 'package:developscreens/commons/logo_image.dart';
 import 'package:developscreens/commons/resp_sizebox.dart';
 import 'package:developscreens/screens/forget_pswd.dart';
+import 'package:developscreens/screens/signup_mail.dart';
 import 'package:developscreens/screens/welcome_to_app.dart';
 import 'package:flutter/material.dart';
 
@@ -39,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
           onPressed: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const WelcomeS()),
+              MaterialPageRoute(builder: (context) =>  WelcomeS()),
             );
           },
           icon: const Icon(Icons.arrow_back),
@@ -58,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
             onTap: () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const WelcomeS()),
+                MaterialPageRoute(builder: (context) => const MailLogin()),
               );
             },
             child: RichText(
@@ -120,12 +121,11 @@ class _LoginPageState extends State<LoginPage> {
               suffixIcon:IconButton(
                 icon: Icon(
 
-                  // Based on passwordVisible state choose the icon
                   _passwordVisible ? Icons.visibility : Icons.visibility_off,
                   color: const Color(0xEDE51D23),
                 ),
                 onPressed: () {
-                  // Update the state i.e. toogle the state of passwordVisible variable
+
                   setState(() {
                     _passwordVisible = !_passwordVisible;
                   });

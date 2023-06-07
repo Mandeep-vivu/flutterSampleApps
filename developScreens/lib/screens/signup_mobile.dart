@@ -26,6 +26,9 @@ class _MobileLogState extends State<MobileLog> {
   late int phLength;
  late TextInputFormatter mobileNumberInputFormatter;
  late String _countryname;
+  void _clearMobileNumberField() {
+    _mobileNumberController.text = '';
+  }
   @override
   void initState() {
     super.initState();
@@ -35,9 +38,7 @@ class _MobileLogState extends State<MobileLog> {
     phLength = 10;
     mobileNumberInputFormatter = LengthLimitingTextInputFormatter(phLength);
   }
-  void _clearMobileNumberField() {
-    _mobileNumberController.text = '';
-  }
+
 
   @override
   void dispose() {
@@ -100,6 +101,65 @@ class _MobileLogState extends State<MobileLog> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      right: BorderSide(color: Color(0xffBEBEBE)),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const ResponsiveSizedBox(
+                        height: 9,
+                      ),
+                      const HeadingWidget(
+                        text: "Country/Region",
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
+                        color: Colors.grey,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          showCountryPicker(
+                            context: context,
+                            showPhoneCode: true,
+                            onSelect: (Country country) {
+                              setState(() {
+                                _countryname = country.name;
+                                _clearMobileNumberField(); // Clear the mobile number field when a new country is selected
+                                dialCode = country.phoneCode;
+                                phLength = country.example.length;
+                                mobileNumberInputFormatter =
+                                    LengthLimitingTextInputFormatter(phLength);
+                              });
+                            },
+                          );
+                        },
+                        child: SizedBox(
+                          height: 44,
+                          child: Row(
+                            children: [
+                              Text(
+                                "(+$dialCode)",
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.normal,
+                                  color: Color(0xff000000),
+                                ),
+                              ),
+                              const Align(
+                                  child: Icon(Icons.arrow_drop_down_sharp)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const ResponsiveSizedBox(
                   height: 9,
                 ),
@@ -109,7 +169,6 @@ class _MobileLogState extends State<MobileLog> {
                   fontWeight: FontWeight.normal,
                   color: Colors.grey,
                 ),
-
                  GestureDetector(
                    onTap: () {
                      showCountryPicker(

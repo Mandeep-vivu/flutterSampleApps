@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:country_picker/country_picker.dart';
 import 'package:developscreens/commons/comn_ui.dart';
 import 'package:developscreens/commons/resp_container.dart';
 import 'package:developscreens/commons/heading_text.dart';
@@ -7,6 +10,7 @@ import 'package:developscreens/screens/mail_verified.dart';
 import 'package:developscreens/screens/signin_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MailLogin extends StatefulWidget {
   const MailLogin({Key? key}) : super(key: key);
@@ -19,14 +23,36 @@ class _MailLoginState extends State<MailLogin> {
   bool isChecked = false;
   final GlobalKey<FormState> _emailFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _passwordFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _mobileformKey = GlobalKey();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _mailController = TextEditingController();
+  final TextEditingController _mobileNumberController = TextEditingController();
   late bool _passwordVisible;
+//mobile
+  late String mobileNumber;
+  bool isNumberInputActive = false;
+  String dialCode = '+91';
+  late int phLength;
+  late TextInputFormatter mobileNumberInputFormatter;
+  late String _countryname;
+  void _clearMobileNumberField() {
+    _mobileNumberController.text = '';
+  }
 
   @override
   void initState() {
     super.initState();
     _passwordVisible = false;
+    _countryname = "India";
+    dialCode = '91';
+    phLength = 10;
+    mobileNumberInputFormatter = LengthLimitingTextInputFormatter(phLength);
+  }
+
+  @override
+  void dispose() {
+    _mobileNumberController.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,6 +61,15 @@ class _MailLoginState extends State<MailLogin> {
     final screenWidth = mediaQuery.size.width;
     final scaleFactor = screenWidth / 375; // 375 is the reference screen width
     final desiredFontSize = 14 * scaleFactor;
+    Widget doneButton = Container();
+    if (Platform.isIOS && isNumberInputActive) {
+      doneButton = IconButton(
+        onPressed: () {
+          FocusScope.of(context).unfocus();
+        },
+        icon: const Icon(Icons.done),
+      );
+    }
     return CommonUI(
       footer: Container(
         padding: const EdgeInsets.symmetric(vertical: 3),
@@ -106,6 +141,30 @@ class _MailLoginState extends State<MailLogin> {
             return null;
           },
         ),
+        const ResponsiveSizedBox(
+          height: 17,
+        ),
+        TextFormField(
+          decoration: InputDecoration(
+            contentPadding:
+                EdgeInsets.symmetric(vertical: 0, horizontal: 12 * scaleFactor),
+            label: Text(
+              "Last name",
+              style: TextStyle(color: Colors.grey),
+            ),
+            labelStyle: const TextStyle(color: Colors.grey),
+            border: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey),
+            ),
+          ),
+          style: const TextStyle(fontSize: 12),
+          validator: (value) {
+            if (value!.isEmpty) {
+              return 'Please enter your name';
+            }
+            return null;
+          },
+        ),
         const ResponsiveSizedBox(height: 17),
         Form(
           key: _emailFormKey,
@@ -145,6 +204,144 @@ class _MailLoginState extends State<MailLogin> {
               }
               return null;
             },
+          ),
+        ),
+        const ResponsiveSizedBox(height: 17),
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
+          ),
+          decoration: const BoxDecoration(
+            border: Border(
+              top: BorderSide(color: Color(0xffBEBEBE)),
+              left: BorderSide(color: Color(0xffBEBEBE)),
+              right: BorderSide(color: Color(0xffBEBEBE)),
+              bottom: BorderSide(color: Color(0xffBEBEBE)),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.fromLTRB(0, 0, 5, 0),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    right: BorderSide(color: Color(0xffBEBEBE)),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const ResponsiveSizedBox(
+                      height: 9,
+                    ),
+                    const HeadingWidget(
+                      text: "Country/Region",
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.grey,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        showCountryPicker(
+                          context: context,
+                          showPhoneCode: true,
+                          onSelect: (Country country) {
+                            setState(() {
+                              _countryname = country.name;
+                              _clearMobileNumberField(); // Clear the mobile number field when a new country is selected
+                              dialCode = country.phoneCode;
+                              phLength = country.example.length;
+                              mobileNumberInputFormatter =
+                                  LengthLimitingTextInputFormatter(phLength);
+                            });
+                          },
+                        );
+                      },
+                      child: SizedBox(
+                        height: 44,
+                        child: Row(
+                          children: [
+                            Text(
+                              "(+$dialCode)",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.normal,
+                                color: Color(0xff000000),
+                              ),
+                            ),
+                            const Align(
+                                child: Icon(Icons.arrow_drop_down_sharp)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(10, 0, 5, 0),
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [const ResponsiveSizedBox(
+                    height: 9,
+                  ),
+                    const HeadingWidget(
+                      text: " Mobile Number",
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(
+                      width: 150,
+                      height: 44,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Form(
+                              key: _mobileformKey,
+                              child: TextFormField(
+                                controller: _mobileNumberController,
+                                keyboardType: TextInputType.phone,
+                                textInputAction: TextInputAction.done,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  mobileNumberInputFormatter
+                                ],
+                                onChanged: (value) {
+                                  setState(() {
+                                    isNumberInputActive = value.isNotEmpty;
+                                  });
+                                },
+                                decoration: const InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding:
+                                        EdgeInsets.fromLTRB(3, 1, 0, 12.6)),
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                validator: (value) {
+                                  if (value!.isEmpty) {
+                                    return 'Please enter your mobile number';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
         const ResponsiveSizedBox(height: 17),

@@ -26,7 +26,8 @@ class CommonUI extends StatelessWidget {
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: const AlwaysScrollableScrollPhysics(),
+
                   child: Container(
                     decoration: BoxDecoration(
                       boxShadow: [
