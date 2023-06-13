@@ -19,7 +19,7 @@ class _PhoneDoneState extends State<PhoneDone> {
   void initState() {
     super.initState();
     // Start the timer when the widget is initialized
-    _timer = Timer(Duration(seconds: 2), () {
+    _timer = Timer(const Duration(seconds: 2), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const FinishSup()),

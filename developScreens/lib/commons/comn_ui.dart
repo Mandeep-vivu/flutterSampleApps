@@ -26,7 +26,7 @@ class CommonUI extends StatelessWidget {
             Expanded(
               child: Center(
                 child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
+                  physics: const BouncingScrollPhysics(),
 
                   child: Container(
                     decoration: BoxDecoration(
@@ -56,9 +56,9 @@ class CommonUI extends StatelessWidget {
                 ),
               ),
             ),
-            const ResponsiveSizedBox(height: 12,),
+            const ResponsiveSizedBox(height: 8,),
             if (footer != null) footer!,
-            const ResponsiveSizedBox(height: 12,)
+            const ResponsiveSizedBox(height: 8,)
           ],
         ),
       ),

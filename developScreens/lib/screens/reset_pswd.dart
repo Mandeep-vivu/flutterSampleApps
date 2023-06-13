@@ -3,24 +3,29 @@ import 'package:developscreens/commons/resp_container.dart';
 import 'package:developscreens/commons/heading_text.dart';
 import 'package:developscreens/commons/logo_image.dart';
 import 'package:developscreens/commons/resp_sizebox.dart';
+import 'package:developscreens/provider_aut.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class ResetPasswordPage extends StatelessWidget {
-  const ResetPasswordPage({Key? key}) : super(key: key);
+class ResetPasswordPage extends StatefulWidget {
+  final String Email1;
+ const ResetPasswordPage({Key? key,required this.Email1}) : super(key: key);
+
+  @override
+  State<ResetPasswordPage> createState() => _ResetPasswordPageState();
+}
+
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
+  final TextEditingController newPasswordController = TextEditingController();
+  final GlobalKey<FormState> _newPasswordFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _confirmNewPasswordFormKey = GlobalKey<FormState>();
+
+  final TextEditingController confirmNewPasswordController =
+  TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return CommonUI(
-      /*backButton:  Align(
-        alignment: Alignment.topLeft,
-        child: IconButton(onPressed: (){
-          Navigator.pop(
-            context,
-
-          );
-        },
-          icon: const Icon(Icons.arrow_back),),
-      ),*/
       children: [
         const LogoImage(),
         const ResponsiveSizedBox(
@@ -38,49 +43,68 @@ class ResetPasswordPage extends StatelessWidget {
         const ResponsiveSizedBox(
           height: 30,
         ),
-        TextFormField(
-          decoration: const InputDecoration(
-            labelText: 'New Password',
-            labelStyle: TextStyle(color: Colors.grey),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+        Form(
+          key: _newPasswordFormKey,
+          child: TextFormField(
+            controller: newPasswordController,
+            decoration: const InputDecoration(
+              labelText: 'New Password',
+              labelStyle: TextStyle(color: Colors.grey),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey),
+              ),
             ),
+            style: const TextStyle(fontSize: 12),
+            obscureText: true,
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please enter your new password';
+              }
+              if (value != confirmNewPasswordController.text) {
+                return 'Passwords do not match';
+              }
+              return null;
+            },
           ),
-          style: const TextStyle(fontSize: 12),
-          obscureText: true,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'Please enter your new password';
-            }
-            return null;
-          },
         ),
         const ResponsiveSizedBox(height: 21),
-        TextFormField(
-          decoration: const InputDecoration(
-            labelText: 'Confirm New Password',
-            labelStyle: TextStyle(color: Colors.grey),
-            border: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+        Form(
+          key: _confirmNewPasswordFormKey,
+          child: TextFormField(
+            controller: confirmNewPasswordController,
+            decoration: const InputDecoration(
+              labelText: 'Confirm New Password',
+              labelStyle: TextStyle(color: Colors.grey),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey),
+              ),
             ),
+            style: const TextStyle(fontSize: 12),
+            obscureText: true,
+            validator: (value) {
+              if (value!.isEmpty) {
+                return 'Please confirm your new password';
+              }
+              return null;
+            },
           ),
-          style: const TextStyle(fontSize: 12),
-          obscureText: true,
-          validator: (value) {
-            if (value!.isEmpty) {
-              return 'Please confirm your new password';
-            }
-            return null;
-          },
         ),
         const ResponsiveSizedBox(height: 20),
         ResponsiveContainer(
           child: ElevatedButton(
             onPressed: () {
-              // Handle password reset button tap
-              // Check if both passwords are equal
-              // If equal, proceed with password reset
-              // If not equal, show an error message
+              final newPassword = newPasswordController.text;
+              final confirmNewPassword = confirmNewPasswordController.text;
+              print(newPassword);
+              print(confirmNewPassword);
+              final authProvider = Provider.of<AuthProvider>(context, listen: false);
+              if (_newPasswordFormKey.currentState!.validate()) {
+
+                authProvider.resetPassword(widget.Email1, newPassword,context);
+              } else {
+                // Show an error message that the passwords do not match
+                print("je");
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFF13131),

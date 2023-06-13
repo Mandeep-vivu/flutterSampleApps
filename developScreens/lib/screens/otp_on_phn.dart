@@ -2,20 +2,21 @@ import 'package:developscreens/commons/comn_ui.dart';
 import 'package:developscreens/commons/heading_text.dart';
 import 'package:developscreens/commons/logo_image.dart';
 import 'package:developscreens/commons/resp_sizebox.dart';
-import 'package:developscreens/screens/otp_verified.dart';
+import 'package:developscreens/provider_aut.dart';
 import 'package:developscreens/screens/welcome_to_app.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:async';
 
-// Import the services package for clipboard access
+import 'package:provider/provider.dart';
+
 class OtpVerify extends StatefulWidget {
   const OtpVerify({
     Key? key,
-    required this.mobileNumber,
+    required this.email,
   }) : super(key: key);
 
-  final String mobileNumber;
+  final String email;
 
 
   @override
@@ -37,6 +38,7 @@ class _OtpVerifyState extends State<OtpVerify> {
       4,
           (_) => TextEditingController(),
     );
+    startCountdown();
   }
 
   @override
@@ -52,7 +54,8 @@ class _OtpVerifyState extends State<OtpVerify> {
     setState(() {
       _countdownSeconds = 60;
       _isVisible = true;
-      _isButtonEnabled = false; // Disable the button
+      _isButtonEnabled = false;
+     // Disable the button
     });
 
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
@@ -66,6 +69,7 @@ class _OtpVerifyState extends State<OtpVerify> {
         }
       });
     });
+
   }
 
 
@@ -93,10 +97,7 @@ class _OtpVerifyState extends State<OtpVerify> {
 
         // If all OTP codes are filled correctly, navigate to the next screen
         if (isOtpValid) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const PhoneDone()),
-          );
+          verifyOtp();
         }
       }
     } else if (value.isEmpty && index > 0) {
@@ -104,12 +105,33 @@ class _OtpVerifyState extends State<OtpVerify> {
       FocusScope.of(context).previousFocus();
     }
   }
+  Future<void> verifyOtp() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final otp = int.parse(_otpCodes.join(''));
+    final verificationResult = await authProvider.verifyOTP(widget.email, otp, context,true);
+    if (!verificationResult) {
+      await stopCountdown(Future.value(false));
+    }
+  }
+  Future<bool> stopCountdown(Future<bool> stopFuture) async {
+    if (_timer != null && _timer!.isActive) {
+      _timer!.cancel();
+      setState(() {
+        _isVisible = false;
+        _isButtonEnabled = true; // Enable the button
+      });
+      final bool result = await stopFuture;
+      return result; // Return the result from the stopFuture
+    }
+    return false; // Countdown was not active
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final scaleFactor = screenHeight / 790; // 812 is the reference screen height
     final buttonHeight = 60 * scaleFactor;
+    return Consumer<AuthProvider>(builder: (context, authProvider, _) {
 
     return CommonUI(
       children: [
@@ -117,7 +139,7 @@ class _OtpVerifyState extends State<OtpVerify> {
         const ResponsiveSizedBox(height: 30),
         HeadingWidget(
           text:
-          'Enter the code just sent to:\n${widget.mobileNumber}',
+          'Enter the code just sent to:\n${widget.email}',
           fontSize: 16,
         ),
         const ResponsiveSizedBox(height: 30),
@@ -203,7 +225,7 @@ class _OtpVerifyState extends State<OtpVerify> {
           onTap: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const WelcomeS()),
+              MaterialPageRoute(builder: (context) => WelcomeS()),
             );
           },
           child: const HeadingWidget(
@@ -214,5 +236,5 @@ class _OtpVerifyState extends State<OtpVerify> {
         ),
       ],
     );
-  }
+  });}
 }

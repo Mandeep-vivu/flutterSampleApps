@@ -20,13 +20,13 @@ class _MailDoneState extends State<MailDone> {
     super.initState();
 
     // Start the timer when the widget is initialized
-   _timer= Timer(Duration(seconds: 2), () {
+   _timer= Timer(const Duration(seconds: 2), () {
       /*Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginPage()),
       );*/
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context){
-        return LoginPage();
+        return const LoginPage();
       }), (r){
         return false;
       });
@@ -40,7 +40,6 @@ class _MailDoneState extends State<MailDone> {
   }
   @override
   Widget build(BuildContext context)  {
-    print(context);
     final screenHeight = MediaQuery.of(context).size.height;
     final scaleFactor =
         screenHeight / 790; // 812 is the reference screen height
@@ -55,7 +54,7 @@ class _MailDoneState extends State<MailDone> {
           onTap: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) =>  LoginPage()),
+              MaterialPageRoute(builder: (context) =>  const LoginPage()),
             );
           },
           child: Column(

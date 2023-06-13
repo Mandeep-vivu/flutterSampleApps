@@ -12,6 +12,7 @@ class FinishSup extends StatefulWidget {
   const FinishSup({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _FinishSupState createState() => _FinishSupState();
 }
 
@@ -27,7 +28,6 @@ class _FinishSupState extends State<FinishSup> {
         _imageFile = File(pickedImage.path);
       } else {
         _imageFile = null; // Reset the image file if no image is selected.
-        print('No image selected.');
       }
     });
   }
@@ -83,7 +83,7 @@ class _FinishSupState extends State<FinishSup> {
                   // Handle continue with Google button tap
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) =>  MailLogin()),
+                    MaterialPageRoute(builder: (context) =>  const MailLogin()),
                         (Route<dynamic> route) => false,
                   );
                 },

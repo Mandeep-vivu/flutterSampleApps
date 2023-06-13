@@ -49,6 +49,11 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
     <string>Access to the photo library is required to pick images for upload.</string>
+<key>NSAppTransportSecurity</key>
+<dict>
+  <key>NSAllowsArbitraryLoads</key>
+  <true/>
+</dict>
 
 </dict>
 </plist>
