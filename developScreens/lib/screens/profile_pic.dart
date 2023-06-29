@@ -4,15 +4,16 @@ import 'package:developscreens/commons/resp_container.dart';
 import 'package:developscreens/commons/heading_text.dart';
 import 'package:developscreens/commons/logo_image.dart';
 import 'package:developscreens/commons/resp_sizebox.dart';
-import 'package:developscreens/screens/signup_mail.dart';
+import 'package:developscreens/provider_aut.dart';
+import 'package:developscreens/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class FinishSup extends StatefulWidget {
   const FinishSup({Key? key}) : super(key: key);
 
   @override
-  // ignore: library_private_types_in_public_api
   _FinishSupState createState() => _FinishSupState();
 }
 
@@ -22,14 +23,19 @@ class _FinishSupState extends State<FinishSup> {
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedImage = await picker.pickImage(source: ImageSource.gallery);
-
+    if (pickedImage != null) {
     setState(() {
-      if (pickedImage != null) {
         _imageFile = File(pickedImage.path);
-      } else {
-        _imageFile = null; // Reset the image file if no image is selected.
-      }
     });
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.uploadImage(_imageFile!);
+
+      } else {
+      setState(() {
+        _imageFile = null;
+      });
+      }
+
   }
 
   @override
@@ -79,13 +85,15 @@ class _FinishSupState extends State<FinishSup> {
           const ResponsiveSizedBox(height: 30,),
           ResponsiveContainer(
             child: ElevatedButton(
-                onPressed: () {
-                  // Handle continue with Google button tap
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) =>  const MailLogin()),
-                        (Route<dynamic> route) => false,
-                  );
+                onPressed: () async {
+
+                  final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                  await authProvider.sendprofilepic();
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context){
+                    return const LoginPage();
+                  }), (r){
+                    return false;
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(

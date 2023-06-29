@@ -1,61 +1,180 @@
+import 'dart:math';
+import 'package:developscreens/messenger/profile_page.dart';
+
 import 'package:developscreens/messenger/individual_page.dart';
-import 'package:developscreens/messenger/message_provider.dart';
-import 'package:contacts_service/contacts_service.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:developscreens/messenger/models/chatmodel.dart';
 import 'package:developscreens/provider_aut.dart';
-import 'package:developscreens/screens/welcome_to_app.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import 'package:developscreens/socket_service.dart';
+
 class HomePa extends StatefulWidget {
-  const HomePa({Key? key}) : super(key: key);
+  final String token;
+  final String userId;
+  const HomePa({
+    Key? key,
+    required this.token,
+    required this.userId,
+  }) : super(key: key);
 
   @override
   State<HomePa> createState() => _HomePaState();
 }
 
 class _HomePaState extends State<HomePa> {
-  final ChatProvider chatProvider = ChatProvider();
+  final SocketService chatProvider = SocketService();
+
   bool isSearching = false;
-  List<ChatModel> filteredChatModels = [];
+  List<ChatModel> filteredChatModelss = [];
   bool isEditMode = false;
   Set<int> selectedChatIds = {};
 
+  bool isBottomSheetOpen = false;
+  late IO.Socket socket;
   @override
   void initState() {
     super.initState();
-    filteredChatModels = chatProvider.chatModels;
+    filteredChatModelss = chatProvider.filteredChatModels;
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    authProvider.selectContact();
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    socketService.connect(widget.token);
+    socketService.addListener(() {
+      updateChatModel(socketService.chatModelss);
+    });
   }
+  @override
+  void dispose() {
+    // Clean up the listeners when the widget is disposed
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    socketService.removeListener(() {
+      updateChatModel(socketService.chatModelss);
+    });
+    super.dispose();
+  }
+  void bottomsheetdata(BuildContext context) {
+    isBottomSheetOpen = true;
+    final authProvider1 = Provider.of<AuthProvider>(context, listen: false);
+    List<dynamic> datalist = authProvider1.data;
 
+    showModalBottomSheet<void>(
+      enableDrag: true,
+      showDragHandle: true,
+      useSafeArea: true,
+      isScrollControlled: true,
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.sizeOf(context).height*0.95,
+          child: ListView.builder(
+            itemCount: datalist.length,
+            itemBuilder: (BuildContext context, int index) {
+              final Map<String, dynamic> contactData = datalist[index];
+              final String contactName =
+                  contactData['first_name'] ?? contactData['phone_no'].toString();
+              final String idm = contactData["_id"];
+              final String lastname = contactData['last_name'] ?? " ";
+
+              String imageurl = contactData['profile_pic'] ??
+                  'https://loremflickr.com/320/240?random=$index';
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(width: 1)),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: Colors.red,
+                    child: CircleAvatar(
+                        radius: 35, backgroundImage: NetworkImage(imageurl)),
+                  ),
+                  title: Text(contactName + " " + lastname),
+                  subtitle: Text(contactData['email']),
+                  onTap: () {
+                    Navigator.pop(context); // Close the bottom sheet
+
+                    Future.microtask(() {
+                      String icon = imageurl;
+                      int maxId = filteredChatModelss.isNotEmpty
+                          ? filteredChatModelss
+                              .map((chatModel) => chatModel.id)
+                              .reduce(max)
+                          : 0;
+                      ChatModel newChatModel = ChatModel(
+                        id: maxId + 1,
+                        personID: idm,
+                        name: contactName,
+                        lastname: contactData['last_name'] ?? " ",
+                        messages: [],
+                        icon: icon,
+                      );
+
+                      final existingChatIndex = filteredChatModelss.indexWhere(
+                          (chatModel) =>
+                              chatModel.personID == newChatModel.personID);
+
+                      if (existingChatIndex != -1) {
+                        ChatModel existingChatModel =
+                            filteredChatModelss[existingChatIndex];
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => IndividualPage(
+                              chatModel: existingChatModel,
+                              updateChatModel: updateChatModel,
+                            ),
+                          ),
+                        );
+                      } else {
+                        updateChatModel(newChatModel);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => IndividualPage(
+                              chatModel: newChatModel,
+                              updateChatModel: updateChatModel,
+                            ),
+                          ),
+                        );
+                      }
+                    });
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      },
+    ).whenComplete(() {
+      isBottomSheetOpen = false;
+    });
+  }
   void updateChatModel(ChatModel updatedChatModel) {
     setState(() {
-      // Find the index of the updated chat model in filteredChatModels
-      int index = filteredChatModels
+      // Update the filteredChatModelss list
+      int index = filteredChatModelss
           .indexWhere((model) => model.id == updatedChatModel.id);
-
       if (index != -1) {
-        // Remove the old chat model
-        filteredChatModels.removeAt(index);
-
-        // Insert the updated chat model at the top
-        filteredChatModels.insert(0, updatedChatModel);
+        filteredChatModelss.removeAt(index);
+        filteredChatModelss.insert(0, updatedChatModel);
       } else {
-        // If the chat model is not found, it is a new chat
-        // Insert the updated chat model at the top
-        filteredChatModels.insert(0, updatedChatModel);
+        filteredChatModelss.insert(0, updatedChatModel);
       }
     });
+
   }
 
   void updateFilteredChatModels(String query) {
     setState(() {
-      filteredChatModels = chatProvider.chatModels
+      filteredChatModelss = chatProvider.filteredChatModels
           .where((chatModel) =>
               chatModel.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
 
-      filteredChatModels.sort((a, b) {
+      filteredChatModelss.sort((a, b) {
         final DateTime? aTime = a.latestMessageTime;
         final DateTime? bTime = b.latestMessageTime;
         if (aTime == null && bTime == null) {
@@ -71,50 +190,11 @@ class _HomePaState extends State<HomePa> {
     });
   }
 
-  Future<void> _selectContact(BuildContext context) async {
-    final Contact? contact = await ContactsService.openDeviceContactPicker();
-    if (contact != null) {
-      bool isGroup = false;
-
-      String icon;
-      if (isGroup) {
-      } else {
-        if (contact.avatar != null && contact.avatar!.isNotEmpty) {
-          // Use contact's avatar as icon
-          icon = 'assets/person.png';
-        } else {
-          // Use fallback image for individual chat
-          icon = 'assets/person.png';
-        }
-      }
-
-      ChatModel newChatModel = ChatModel(
-        id: filteredChatModels.length + 1,
-        name: contact.displayName ?? '',
-        isGroup: isGroup,
-        messages: [],
-        icon: icon,
-      );
-
-      updateChatModel(newChatModel);
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => IndividualPage(
-            chatModel: newChatModel,
-            updateChatModel: updateChatModel,
-          ),
-        ),
-      );
-    }
-  }
-
   void toggleEditMode(bool value) {
     setState(() {
       isEditMode = value;
       if (!isEditMode) {
-        // Clear selected chat IDs when exiting delete mode
+
         selectedChatIds.clear();
       }
     });
@@ -127,14 +207,16 @@ class _HomePaState extends State<HomePa> {
       } else {
         selectedChatIds.add(chatId);
       }
+      if (selectedChatIds.isEmpty) {
+        toggleEditMode(false);
+      }
     });
   }
 
   void deleteSelectedChats() {
     setState(() {
-      chatProvider.chatModels
+      chatProvider.filteredChatModels
           .removeWhere((chat) => selectedChatIds.contains(chat.id));
-
       selectedChatIds.clear();
 
       isEditMode = false;
@@ -157,20 +239,20 @@ class _HomePaState extends State<HomePa> {
           ),
           Expanded(
             child: ListView.separated(
-              itemCount: filteredChatModels.length,
+              itemCount: filteredChatModelss.length,
               itemBuilder: (context, index) => InkWell(
                 onLongPress: () {
                   // Enable delete mode
                   toggleEditMode(true);
                   // Select the current chat
-                  selectChat(filteredChatModels[index].id);
+                  selectChat(filteredChatModelss[index].id);
                 },
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => IndividualPage(
-                        chatModel: filteredChatModels[index],
+                        chatModel: filteredChatModelss[index],
                         updateChatModel: updateChatModel,
                       ),
                     ),
@@ -178,15 +260,14 @@ class _HomePaState extends State<HomePa> {
                 },
                 child: Column(
                   children: [
-                    buildListTile(filteredChatModels[index]),
-                    const Padding(
-                      padding: EdgeInsets.only(right: 20, left: 80),
-                    ),
+                    buildListTile(filteredChatModelss[index]),
                   ],
                 ),
               ),
               separatorBuilder: (BuildContext context, int index) =>
                   const Divider(
+                height: 4,
+                thickness: 1,
                 color: Colors.grey,
               ),
             ),
@@ -194,10 +275,28 @@ class _HomePaState extends State<HomePa> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _selectContact(context);
+        onPressed: () async {
+          if (!isBottomSheetOpen) {
+            final authProvider =
+                Provider.of<AuthProvider>(context, listen: false);
+            if (authProvider.data.isNotEmpty) {
+              bottomsheetdata(context);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content:
+                      Text("either no connections or wait to load connection"),
+                  duration: Duration(seconds: 1),
+                  backgroundColor: Color(0xc3f55a50),
+                  margin: EdgeInsets.fromLTRB(40, 0, 40, 80),
+                  showCloseIcon: true,
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          }
         },
-        elevation: 0,
+        elevation: 1,
         splashColor: Colors.amberAccent,
         child: const Icon(Icons.add),
       ),
@@ -213,14 +312,10 @@ class _HomePaState extends State<HomePa> {
       tileColor: tileColor,
       leading: CircleAvatar(
         radius: 30,
-        child: Image.asset(
-          chatModel.icon,
-          height: 36,
-          width: 36,
-        ),
+        backgroundImage: NetworkImage(chatModel.icon),
       ),
       title: Text(
-        chatModel.name,
+        "${chatModel.name} ${chatModel.lastname}",
         style: const TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
@@ -228,24 +323,37 @@ class _HomePaState extends State<HomePa> {
       ),
       subtitle: Row(
         children: [
-          const Icon(Icons.done_all),
+          const SizedBox(
+              height: 30,
+              child: Icon(
+                Icons.done_all,
+                size: 18,
+              )),
           const SizedBox(
             width: 3,
           ),
-          Text(
-            chatModel.messages.isNotEmpty
-                ? chatModel.messages.last.text
-                : "No messages",
-            style: const TextStyle(
-              fontSize: 13,
+          Expanded(
+            child: Container(
+              height: 30,
+              padding: const EdgeInsets.all(5),
+              child: Text(
+                chatModel.messages.isNotEmpty
+                    ? chatModel.messages.last.text.trim()
+                    : "No messages",
+                style: const TextStyle(
+                    fontSize: 13, overflow: TextOverflow.ellipsis),
+              ),
             ),
           ),
         ],
       ),
-      trailing: Text(
-        chatModel.latestMessageTime != null
-            ? DateFormat('hh:mm a').format(chatModel.latestMessageTime!)
-            : "",
+      trailing: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 18, 0, 0),
+        child: Text(
+          chatModel.latestMessageTime != null
+              ? DateFormat('hh:mm a').format(chatModel.latestMessageTime!)
+              : "",
+        ),
       ),
       onTap: () {
         if (!isEditMode) {
@@ -278,7 +386,7 @@ class _HomePaState extends State<HomePa> {
       backgroundColor: Colors.white,
       leading: isEditMode
           ? IconButton(
-              icon: Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back),
               onPressed: () {
                 toggleEditMode(false);
               },
@@ -314,7 +422,7 @@ class _HomePaState extends State<HomePa> {
       actions: [
         if (isEditMode)
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
             onPressed: selectedChatIds.isNotEmpty ? deleteSelectedChats : null,
           ),
         isSearching
@@ -322,7 +430,7 @@ class _HomePaState extends State<HomePa> {
                 onPressed: () {
                   setState(() {
                     isSearching = false;
-                    filteredChatModels = chatProvider.chatModels;
+                    filteredChatModelss = chatProvider.filteredChatModels;
                   });
                 },
                 icon: const Icon(Icons.cancel),
@@ -344,17 +452,29 @@ class _HomePaState extends State<HomePa> {
           onPressed: () {
             showMenu(
               context: context,
-              position: RelativeRect.fromLTRB(0, 0, 0, 0),
+              position: const RelativeRect.fromLTRB(20, 10, 5, 20),
               items: [
-                PopupMenuItem(
-                  child: Text("Logout"),
+                const PopupMenuItem(
+                  value: "myprofile",
+                  child: Text("Profile"),
+                ),
+                const PopupMenuItem(
                   value: "logout",
+                  child: Text("Logout"),
                 ),
               ],
             ).then((selectedValue) {
+              if (selectedValue == "myprofile") {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => profile_page()));
+              }
               if (selectedValue == "logout") {
-                final authProvider = Provider.of<AuthProvider>(context, listen: false);
+                final authProvider =
+                    Provider.of<AuthProvider>(context, listen: false);
                 authProvider.logoutUser(context);
+                final socketService =
+                    Provider.of<SocketService>(context, listen: false);
+                socketService.disconnect();
               }
             });
           },

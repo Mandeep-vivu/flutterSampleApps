@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:provider/provider.dart';
 
-class OtpVerify extends StatefulWidget {
-  const OtpVerify({
+class EOtpVerify extends StatefulWidget {
+  const EOtpVerify({
     Key? key,
     required this.email,
   }) : super(key: key);
@@ -17,10 +17,10 @@ class OtpVerify extends StatefulWidget {
   final String email;
 
   @override
-  State<OtpVerify> createState() => _OtpVerifyState();
+  State<EOtpVerify> createState() => _EOtpVerifyState();
 }
 
-class _OtpVerifyState extends State<OtpVerify> {
+class _EOtpVerifyState extends State<EOtpVerify> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final List<String> _otpCodes = List.generate(4, (_) => '');
   late List<TextEditingController> _controllers;
@@ -28,9 +28,12 @@ class _OtpVerifyState extends State<OtpVerify> {
   int _countdownSeconds = 60;
   bool _isVisible = false;
   bool _isButtonEnabled = true;
+
+
   @override
   void initState() {
     super.initState();
+
     _controllers = List.generate(
       4,
       (_) => TextEditingController(),
@@ -53,7 +56,6 @@ class _OtpVerifyState extends State<OtpVerify> {
       _isVisible = true;
       _isButtonEnabled = false;
       // Disable the button
-
     });
 
     _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
@@ -74,14 +76,10 @@ class _OtpVerifyState extends State<OtpVerify> {
 
     if (value.isNotEmpty) {
       if (index < _controllers.length - 1) {
-        // If the current field is not the last one, move focus to the next field
         _controllers[index + 1].text = '';
         FocusScope.of(context).nextFocus();
       } else {
-        // If the current field is the last one, unfocus to dismiss the keyboard
         FocusScope.of(context).unfocus();
-
-        // Validate OTP codes
         bool isOtpValid = true;
         for (var otpCode in _otpCodes) {
           if (otpCode.isEmpty) {
@@ -90,13 +88,11 @@ class _OtpVerifyState extends State<OtpVerify> {
           }
         }
 
-        // If all OTP codes are filled correctly, navigate to the next screen
         if (isOtpValid) {
           verifyOtp();
         }
       }
     } else if (value.isEmpty && index > 0) {
-      // If the current field is empty and not the first one, move focus to the previous field
       FocusScope.of(context).previousFocus();
     }
   }
@@ -105,35 +101,36 @@ class _OtpVerifyState extends State<OtpVerify> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final otp = int.parse(_otpCodes.join(''));
     final verificationResult =
-        await authProvider.verifyOTP(widget.email, otp, context, true);
+        await authProvider.verifyMOTP( otp, context, true);
     if (!verificationResult) {
       await stopCountdown(Future.value(false));
     }
   }
   Future<void> resendOtp() async {
-    final authProvider =
-    Provider.of<AuthProvider>(context, listen: false);
-    authProvider.sendResetLink(authProvider.email, context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.sendVerifyEmail(context);
     startCountdown();
   }
+
   Future<bool> stopCountdown(Future<bool> stopFuture) async {
     if (_timer != null && _timer!.isActive) {
       _timer!.cancel();
       setState(() {
         _isVisible = false;
-        _isButtonEnabled = true; // Enable the button
+        _isButtonEnabled = true;
       });
       final bool result = await stopFuture;
-      return result; // Return the result from the stopFuture
+      return result;
     }
-    return false; // Countdown was not active
+    return false;
   }
 
   @override
   Widget build(BuildContext context) {
+
     final screenHeight = MediaQuery.of(context).size.height;
     final scaleFactor =
-        screenHeight / 790; // 812 is the reference screen height
+        screenHeight / 790;
     final buttonHeight = 60 * scaleFactor;
     return Consumer<AuthProvider>(builder: (context, authProvider, _) {
       return CommonUI(

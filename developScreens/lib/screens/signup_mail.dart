@@ -7,7 +7,7 @@ import 'package:developscreens/commons/heading_text.dart';
 import 'package:developscreens/commons/logo_image.dart';
 import 'package:developscreens/commons/resp_sizebox.dart';
 import 'package:developscreens/provider_aut.dart';
-import 'package:developscreens/screens/mail_verified.dart';
+import 'package:developscreens/screens/emailotp_verify.dart';
 import 'package:developscreens/screens/signin_screen.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -35,6 +35,7 @@ class _MailLoginState extends State<MailLogin> {
   final TextEditingController _firstController = TextEditingController();
   final TextEditingController _lastController = TextEditingController();
   late bool _passwordVisible;
+  late bool _passwordVisible1;
 //mobile
   late String mobileNumber;
   bool isNumberInputActive = false;
@@ -50,6 +51,7 @@ class _MailLoginState extends State<MailLogin> {
   void initState() {
     super.initState();
     _passwordVisible = false;
+   _passwordVisible1=false;
     dialCode = '91';
     phLength = 10;
     mobileNumberInputFormatter = LengthLimitingTextInputFormatter(phLength);
@@ -155,7 +157,6 @@ class _MailLoginState extends State<MailLogin> {
                     ),
                   ),
                   labelStyle: const TextStyle(color: Colors.grey),
-
                   suffixIcon: const Icon(
                       Icons.person, color: Color(0xEDE51D23)),
                 ),
@@ -451,7 +452,7 @@ class _MailLoginState extends State<MailLogin> {
                 key: _cpasswordFormKey,
                 child: TextFormField(
                   controller: _password1Controller,
-                  obscureText: !_passwordVisible,
+                  obscureText: !_passwordVisible1,
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 0, horizontal: 12),
@@ -468,14 +469,13 @@ class _MailLoginState extends State<MailLogin> {
                     suffixIcon:
                     IconButton(
                       icon: Icon(
-
-                        _passwordVisible ? Icons.visibility : Icons
+                        _passwordVisible1 ? Icons.visibility : Icons
                             .visibility_off,
                         color: const Color(0xEDE51D23),
                       ),
                       onPressed: () {
                         setState(() {
-                          _passwordVisible = !_passwordVisible;
+                          _passwordVisible1 = !_passwordVisible1;
                         });
                       },
                     ),
@@ -598,13 +598,7 @@ class _MailLoginState extends State<MailLogin> {
                 ),
               ),
               if (authProvider.isLoading) const CircularProgressIndicator(),
-              if (authProvider.error != null)
-                Text(
-                  authProvider.error!,
-                  style: const TextStyle(color: Colors.red),
-                ),
-              if (authProvider.isLoggedIn)
-                const Text('Signed up successfully!'),
+
             ],
 
           )
@@ -616,20 +610,14 @@ class _MailLoginState extends State<MailLogin> {
     if (_emailFormKey.currentState!.validate() &&
         _passwordFormKey.currentState!.validate()) {
       // Forms are valid, continue with further actions
-      final name = _firstController.text + ' ' + _lastController.text;
+      final name = _firstController.text ;
+      final lname=_lastController.text;
       final email = _mailController.text;
       final phoneNo = _mobileNumberController.text;
       final password = _passwordController.text;
 
-      authProvider.signUp(name, email, phoneNo, password);
-      if(authProvider.isLoggedIn==true) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return const VerificationPopup();
-          },
-        );
-      }
+      authProvider.signUp(name,lname, email, phoneNo, password,context);
+
     }
   }
 }
@@ -644,6 +632,8 @@ class VerificationPopup extends StatelessWidget {
     final mediaQuery = MediaQuery.of(context);
     final screenWidth = mediaQuery.size.width;
     final scaleFactor = screenWidth / 375;
+    final authProvider =
+    Provider.of<AuthProvider>(context, listen: false);
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -710,11 +700,7 @@ class VerificationPopup extends StatelessWidget {
                   child: ElevatedButton(
                       onPressed: () {
                         // Handle continue with Google button tap
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const MailDone()),
-                        );
+                        Navigator.push(context,MaterialPageRoute(builder: (context)=>EOtpVerify(email: authProvider.email,)));
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFF13131),

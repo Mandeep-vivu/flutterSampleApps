@@ -2,9 +2,10 @@ import 'package:developscreens/messenger/messageContainers/own_msg_card.dart';
 import 'package:developscreens/messenger/messageContainers/reply_msg_card.dart';
 import 'package:developscreens/messenger/message_provider.dart';
 import 'package:developscreens/messenger/models/chatmodel.dart';
+import 'package:developscreens/provider_aut.dart';
+import 'package:developscreens/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'models/message_modal.dart';
@@ -13,31 +14,39 @@ class IndividualPage extends StatefulWidget {
   final ChatModel chatModel;
   final Function(ChatModel) updateChatModel;
 
-
   IndividualPage({
+    super.key,
     required this.chatModel,
     required this.updateChatModel,
-
   });
 
   @override
   _IndividualPageState createState() => _IndividualPageState();
 }
 
-
 class _IndividualPageState extends State<IndividualPage> {
   bool show = false;
   FocusNode focusNode = FocusNode();
   bool sendButton = false;
-  TextEditingController _controller = TextEditingController();
-  ScrollController _scrollController = ScrollController();
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool isSelectionMode = false;
+  List<MessageModel> selectedMessages = [];
+  DateTime currentDate = DateTime.now();
 
   int? currentMonth;
-  List<MessageModel> selectedMessages = [];
 
   @override
   void initState() {
     super.initState();
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    socketService.createConnection(
+      authProvider.personids,
+      widget.chatModel.personID,
+      authProvider.token,
+    );
+    socketService.joinSocket();
     _scrollToBottom();
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
@@ -52,7 +61,7 @@ class _IndividualPageState extends State<IndividualPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollController.animateTo(
         _scrollController.position.maxScrollExtent,
-        duration: Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 300),
         curve: Curves.easeOut,
       );
     });
@@ -60,365 +69,353 @@ class _IndividualPageState extends State<IndividualPage> {
 
   bool isDifferentMonth(int index) {
     if (index == 0) {
-      return true; // Always show month header for the first message
+      return true;
     }
     final currentMessage = widget.chatModel.messages[index];
     final previousMessage = widget.chatModel.messages[index - 1];
-    return currentMessage.time.month != previousMessage.time.month;
+    final currentMessageDate = currentMessage.time;
+    final previousMessageDate = previousMessage.time;
+    return currentMessageDate.month != previousMessageDate.month ||
+        currentMessageDate.day != previousMessageDate.day;
   }
 
-  String getMonthName(int month) {
-    switch (month) {
-      case 1:
-        return 'January';
-      case 2:
-        return 'February';
-      case 3:
-        return 'March';
-      case 4:
-        return 'April';
-      case 5:
-        return 'May';
-      case 6:
-        return 'June';
-      case 7:
-        return 'July';
-      case 8:
-        return 'August';
-      case 9:
-        return 'September';
-      case 10:
-        return 'October';
-      case 11:
-        return 'November';
-      case 12:
-        return 'December';
-      default:
-        return '';
+  String getFormattedDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime.now();
+    final yesterday = DateTime.now().subtract(Duration(days: 1));
+
+    if (date.year == today.year &&
+        date.month == today.month &&
+        date.day == today.day) {
+      return 'Today';
+    } else if (date.year == yesterday.year &&
+        date.month == yesterday.month &&
+        date.day == yesterday.day) {
+      return 'Yesterday';
+    } else {
+      if (date.year != now.year) {
+        return DateFormat('MMM d, yyyy').format(date);
+      } else {
+        return DateFormat('MMM d').format(date);
+      }
     }
   }
 
-
-  Widget buildMonthHeader(String monthName) {
+  Widget buildMonthHeader(DateTime date) {
+    final formattedDate = getFormattedDate(date);
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      color: Colors.grey[300],
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       child: Text(
-        monthName,
-        style: TextStyle(
+        formattedDate,
+        style: const TextStyle(
           fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
+  void _handleBackPressed() {
+    if (isSelectionMode) {
+      setState(() {
+        selectedMessages.clear();
+        isSelectionMode = false;
+      });
+    } else {
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Consumer<ChatProvider>(
-        builder: (context, chatProvider, _) {
+    return Consumer<SocketService>(builder: (context, chatProvider, _) {
+      widget.chatModel.messages.sort((a, b) => a.time.compareTo(b.time));
 
-        return Scaffold(
-          backgroundColor: Colors.transparent,
-          appBar: PreferredSize(
-            preferredSize: Size.fromHeight(60),
-            child: AppBar(
-              leadingWidth: 70,
-              titleSpacing: 0,
-              leading: InkWell(
-                onTap: () {
-                  Navigator.pop(context);
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.arrow_back,
-                      size: 24,
-                    ),
-                    CircleAvatar(
-                      child: Image.asset(
-                        widget.chatModel.isGroup
-                            ? "assets/grp.png"
-                            : "assets/person.png",
-                        height: 36,
-                        width: 36,
-                      ),
-                      radius: 20,
-                      backgroundColor: Colors.blueGrey,
-                    ),
-                  ],
-                ),
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: AppBar(
+            leadingWidth: 55,
+            titleSpacing: 0,
+            leading: InkWell(
+              onTap: _handleBackPressed,
+              child: const Icon(
+                Icons.arrow_back,
+                size: 24,
               ),
-              title: InkWell(
-                onTap: () {},
-                child: Container(
-                  margin: EdgeInsets.all(6),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.chatModel.name,
-                        style: TextStyle(
-                          fontSize: 18.5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+            ),
+            title: Row(
+              mainAxisSize: MainAxisSize.max,
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundImage: NetworkImage(widget.chatModel.icon),
                 ),
-              ),
-              actions: selectedMessages.isNotEmpty
-                  ? [
-                IconButton(
-                  onPressed: () {
-
-                    // Perform delete action
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('Delete Messages'),
-                          content: Text(
-                            'Are you sure you want to delete the selected messages?',
+                SizedBox(
+                  width: 5,
+                ),
+                InkWell(
+                  onTap: () {},
+                  child: Container(
+                    margin: const EdgeInsets.all(6),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${widget.chatModel.name} ${widget.chatModel.lastname}",
+                          style: const TextStyle(
+                            fontSize: 18.5,
+                            fontWeight: FontWeight.bold,
                           ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                              deleteSelectedMessages();
-
-                              },
-                              child: Text('Delete'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text('Cancel'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  icon: Icon(Icons.delete),
-                ),
-                IconButton(
-                  onPressed: () {
-                    // Perform copy action
-                    String combinedText = selectedMessages
-                        .map((message) => message.text)
-                        .join('\n');
-                    Clipboard.setData(ClipboardData(text: combinedText));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Copied selected messages')),
-                    );
-                  },
-                  icon: Icon(Icons.content_copy),
-                ),
-              ]
-                  : [
-                IconButton(
-                    icon: Icon(
-                      Icons.delete,
-                      color: Colors.red,
+                        ),
+                      ],
                     ),
-                    onPressed: () {
-                      setState(() {
-                        selectedMessages = [];
-                      });
-                    }),
-                PopupMenuButton<String>(
-                  padding: EdgeInsets.all(0),
-                  onSelected: (value) {
-                    print(value);
-                  },
-                  itemBuilder: (BuildContext contesxt) {
-                    return [
-                      PopupMenuItem(
-                        child: Text("View Contact"),
-                        value: "View Contact",
-                      ),
-                      PopupMenuItem(
-                        child: Text("Search"),
-                        value: "Search",
-                      ),
-                    ];
-                  },
+                  ),
                 ),
               ],
             ),
-          ),
-          body: Container(
-            decoration: BoxDecoration(color: Colors.white),
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: WillPopScope(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 5),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        controller: _scrollController,
-                        itemCount: (widget.chatModel.messages.length),
-                        itemBuilder: (context, index) {
-                          final message = widget.chatModel.messages[index];
-                          final isDifferent = isDifferentMonth(index);
-                          final monthName = getMonthName(message.time.month);
-
-
-                          if (isDifferent) {
-                            return Column(
-                              children: [
-                                buildMonthHeader(monthName),
-                                buildMessageCard(message),
+            actions: isSelectionMode
+                ? [
+                    IconButton(
+                      onPressed: () {
+                        // Perform delete action
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              title: const Text('Delete Messages'),
+                              content: const Text(
+                                'Are you sure you want to delete the selected messages?',
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    deleteSelectedMessages();
+                                  },
+                                  child: const Text('Delete'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
                               ],
                             );
-                          } else {
-                            return buildMessageCard(message);
-                          }
-                        },
-                      ),
+                          },
+                        );
+                      },
+                      icon: const Icon(Icons.delete),
                     ),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        height: 70,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: MediaQuery.of(context).size.width - 60,
-                                    child: Card(
-                                      margin: EdgeInsets.only(
-                                          left: 2, right: 2, bottom: 8),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(25),
-                                      ),
-                                      child: TextFormField(
-                                        controller: _controller,
-                                        focusNode: focusNode,
-                                        textAlignVertical: TextAlignVertical.center,
-                                        keyboardType: TextInputType.multiline,
-                                        maxLines: 5,
-                                        minLines: 1,
-                                        onChanged: (value) {
-                                          if (value.isNotEmpty) {
-                                            setState(() {
-                                              sendButton = true;
-                                            });
-                                          } else {
-                                            setState(() {
-                                              sendButton = false;
-                                            });
-                                          }
-                                        },
-                                        decoration: InputDecoration(
-                                          border: InputBorder.none,
-                                          hintText: "Type a message",
-                                          hintStyle: TextStyle(color: Colors.grey),
-                                          prefixIcon: IconButton(
-                                            icon: Icon(
-                                              show
-                                                  ? Icons.keyboard
-                                                  : Icons.emoji_emotions_outlined,
-                                            ),
-                                            onPressed: () {
-                                              if (!show) {
-                                                focusNode.unfocus();
-                                                focusNode.canRequestFocus = false;
-                                              }
-                                              setState(() {
-                                                show = !show;
-                                              });
-                                            },
-                                          ),
-                                          suffixIcon: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [],
-                                          ),
-                                          contentPadding: EdgeInsets.all(5),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      bottom: 8,
-                                      right: 2,
-                                      left: 2,
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 25,
-                                      backgroundColor: Color(0xFFfa5a50),
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.send,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-
-
-                                          if (sendButton) {
-                                            sendButton = false;
-
-                                            String message = _controller.text;
-
-                                            // Update the current chat model with the new message
-                                            ChatModel updatedChatModel = widget.chatModel;
-                                            updatedChatModel.addMessage(MessageModel(
-                                              text: message,
-                                              time: DateTime.now(),
-                                              isSent: true,
-                                              isRead: false,
-                                            ));
-
-                                            // Call the updateChatModel callback with the updated ChatModel
-                                            widget.updateChatModel(updatedChatModel);
-
-                                            _controller.clear();
-                                            _scrollToBottom();
-                                          }
-                                          });
-                                        },
-
-
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            show ? Container() : Container(),
-                          ],
-                        ),
-                      ),
+                    IconButton(
+                      onPressed: () {
+                        // Perform copy action
+                        String combinedText = selectedMessages
+                            .map((message) => message.text)
+                            .join('\n');
+                        Clipboard.setData(ClipboardData(text: combinedText));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                              content: Text('Copied selected messages')),
+                        );
+                      },
+                      icon: const Icon(Icons.content_copy),
+                    ),
+                  ]
+                : [
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.more_vert),
+                      padding: const EdgeInsets.all(0),
+                      onSelected: (value) {
+                        print(value);
+                      },
+                      itemBuilder: (BuildContext contesxt) {
+                        return [
+                          const PopupMenuItem(
+                            value: "View Contact",
+                            child: Text("View Contact"),
+                          ),
+                          const PopupMenuItem(
+                            value: "Search",
+                            child: Text("Search"),
+                          ),
+                        ];
+                      },
                     ),
                   ],
-                ),
-              ),
-              onWillPop: () {
-                if (show) {
-                  setState(() {
-                    show = false;
-                  });
-                  return Future.value(false);
-                } else {
-                  Navigator.pop(context);
-                  return Future.value(true);
-                }
-              },
-            ),
           ),
-        );
-      }
-    );
+        ),
+        body: Container(
+          decoration: const BoxDecoration(color: Colors.white),
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: WillPopScope(
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 1),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      controller: _scrollController,
+                      itemCount: (widget.chatModel.messages.length),
+                      itemBuilder: (context, index) {
+                        final message = widget.chatModel.messages[index];
+                        final isDifferent = isDifferentMonth(index);
+                        if (isDifferent) {
+                          return Column(
+                            children: [
+                              buildMonthHeader(message.time),
+                              buildMessageCard(message),
+                            ],
+                          );
+                        } else {
+                          _scrollToBottom();
+                          return buildMessageCard(message);
+                        }
+                      },
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: 70,
+                      padding: const EdgeInsets.only(left: 4),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: MediaQuery.of(context).size.width - 60,
+                                  child: Card(
+                                    margin: const EdgeInsets.only(
+                                        left: 2, right: 2, bottom: 8),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                    child: TextFormField(
+                                      controller: _controller,
+                                      focusNode: focusNode,
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
+                                      keyboardType: TextInputType.multiline,
+                                      maxLines: 5,
+                                      minLines: 1,
+                                      onChanged: (value) {
+                                        if (value.isNotEmpty) {
+                                          setState(() {
+                                            sendButton = true;
+                                          });
+                                        } else {
+                                          setState(() {
+                                            sendButton = false;
+                                          });
+                                        }
+                                      },
+                                      decoration: InputDecoration(
+                                        border: InputBorder.none,
+                                        hintText: "Type a message",
+                                        hintStyle:
+                                            const TextStyle(color: Colors.grey),
+                                        prefixIcon: IconButton(
+                                          icon: Icon(
+                                            show
+                                                ? Icons.keyboard
+                                                : Icons.emoji_emotions_outlined,
+                                          ),
+                                          onPressed: () {
+                                            if (!show) {
+                                              focusNode.unfocus();
+                                              focusNode.canRequestFocus = false;
+                                            }
+                                            setState(() {
+                                              show = !show;
+                                            });
+                                          },
+                                        ),
+                                        suffixIcon: const Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [],
+                                        ),
+                                        contentPadding: const EdgeInsets.all(5),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: 8,
+                                    right: 4,
+                                    left: 0,
+                                  ),
+                                  child: CircleAvatar(
+                                    radius: 25,
+                                    backgroundColor: const Color(0xFFfa5a50),
+                                    child: IconButton(
+                                      icon: const Icon(
+                                        Icons.send,
+                                        color: Colors.white,
+                                      ),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (sendButton) {
+                                            sendButton = false;
+                                            String message = _controller.text;
+                                            ChatModel updatedChatModel =
+                                                widget.chatModel;
+                                              final socketService =
+                                                  Provider.of<SocketService>(
+                                                      context,
+                                                      listen: false);
+                                              final authProvider =
+                                                  Provider.of<AuthProvider>(
+                                                      context,
+                                                      listen: false);
+                                              socketService.sendMessage(
+                                                  authProvider.personids,
+                                                  widget.chatModel.personID,
+                                                  authProvider.token,
+                                                message,
+                                                  updatedChatModel
+                                              );
+                                            widget.updateChatModel(updatedChatModel);
+                                            _controller.clear();
+
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          show ? Container() : Container(),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            onWillPop: () {
+              if (show) {
+                setState(() {
+                  show = false;
+                });
+                return Future.value(false);
+              } else {
+                Navigator.pop(context);
+                return Future.value(true);
+              }
+            },
+          ),
+        ),
+      );
+    });
   }
 
   Widget bottomSheet() {
@@ -437,28 +434,28 @@ class _IndividualPageState extends State<IndividualPage> {
                 children: [
                   iconCreation(
                       Icons.insert_drive_file, Colors.indigo, "Document"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.camera_alt, Colors.pink, "Camera"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.insert_photo, Colors.purple, "Gallery"),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 30,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   iconCreation(Icons.headset, Colors.orange, "Audio"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.location_pin, Colors.teal, "Location"),
-                  SizedBox(
+                  const SizedBox(
                     width: 40,
                   ),
                   iconCreation(Icons.person, Colors.blue, "Contact"),
@@ -470,51 +467,59 @@ class _IndividualPageState extends State<IndividualPage> {
       ),
     );
   }
+
   void deleteSelectedMessages() {
     setState(() {
-      widget.chatModel.messages.removeWhere((message) => selectedMessages.contains(message));
+      widget.chatModel.messages
+          .removeWhere((message) => selectedMessages.contains(message));
       selectedMessages.clear();
       widget.updateChatModel(widget.chatModel);
+      isSelectionMode = false;
       Navigator.pop(context);
     });
   }
 
-
   Widget buildMessageCard(MessageModel message) {
+    final isSelected = selectedMessages.contains(message);
+
     return GestureDetector(
       onLongPress: () {
         setState(() {
-          message.isSelected = true;
+          isSelectionMode = true;
           selectedMessages.add(message);
         });
       },
       onTap: () {
-        if (selectedMessages.isNotEmpty) {
+        if (isSelectionMode) {
           setState(() {
-            if (message.isSelected) {
+            if (isSelected) {
               selectedMessages.remove(message);
-              message.isSelected = false;
+              if (selectedMessages.isEmpty) {
+                isSelectionMode = false;
+              }
             } else {
               selectedMessages.add(message);
-              message.isSelected = true;
             }
           });
         }
       },
       child: Container(
         decoration: BoxDecoration(
-          color: message.isSelected ? Colors.blue.withOpacity(0.2) : Colors.transparent,
+          color: message.isSelected
+              ? Colors.blue.withOpacity(0.2)
+              : Colors.transparent,
           // Add any desired container styling for selected messages
         ),
         child: message.isSent
             ? OwnMessageCard(
                 message: message.text,
                 time: DateFormat('HH:mm').format(message.time),
-
+                isSelected: isSelected,
               )
             : ReplyCard(
                 message: message.text,
                 time: DateFormat('HH:mm').format(message.time),
+                isSelected: isSelected,
               ),
       ),
     );
@@ -535,12 +540,12 @@ class _IndividualPageState extends State<IndividualPage> {
               color: Colors.white,
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 5,
           ),
           Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               // fontWeight: FontWeight.w100,
             ),

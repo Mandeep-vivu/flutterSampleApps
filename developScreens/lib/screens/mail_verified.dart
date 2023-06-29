@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:developscreens/commons/heading_text.dart';
 import 'package:developscreens/commons/resp_sizebox.dart';
+import 'package:developscreens/screens/profile_pic.dart';
 import 'package:developscreens/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -21,15 +22,11 @@ class _MailDoneState extends State<MailDone> {
 
     // Start the timer when the widget is initialized
    _timer= Timer(const Duration(seconds: 2), () {
-      /*Navigator.pushReplacement(
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );*/
-      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (BuildContext context){
-        return const LoginPage();
-      }), (r){
-        return false;
-      });
+        MaterialPageRoute(builder: (context) => FinishSup()),
+      );
+
     });
   }
   @override

@@ -28,7 +28,7 @@ class WelcomeS extends StatelessWidget {
               onTap: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) =>  const LoginPage()),
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
               },
               child: RichText(
@@ -52,15 +52,12 @@ class WelcomeS extends StatelessWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-
               const ResponsiveSizedBox(
                 height: 12,
               ),
               ResponsiveContainer(
                 child: ElevatedButton(
-                    onPressed: () {
-
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xEDDB4437),
                         shape: RoundedRectangleBorder(
@@ -85,9 +82,7 @@ class WelcomeS extends StatelessWidget {
               ),
               ResponsiveContainer(
                 child: ElevatedButton(
-                    onPressed: () {
-
-                    },
+                    onPressed: () {},
                     style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF3B5998),
                         shape: RoundedRectangleBorder(
@@ -106,9 +101,7 @@ class WelcomeS extends StatelessWidget {
                           text: 'Continue with Facebook',
                         ),
                       ],
-                    )
-
-                    ),
+                    )),
               ),
             ],
           ),

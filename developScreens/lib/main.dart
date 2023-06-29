@@ -1,12 +1,11 @@
-import 'package:developscreens/messenger/message_provider.dart';
 import 'package:developscreens/provider_aut.dart';
 import 'package:developscreens/screens/welcome_to_app.dart';
+import 'package:developscreens/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'messenger/homepage.dart';
 
 void main() => runApp(const MyApp());
 
@@ -23,9 +22,11 @@ class MyApp extends StatelessWidget {
     return MultiProvider(providers: [ChangeNotifierProvider<AuthProvider>(
       create: (_) => AuthProvider(),
     ),
-      ChangeNotifierProvider<ChatProvider>(
-        create: (_) => ChatProvider(),
-      ),],
+
+      ChangeNotifierProvider<SocketService>(
+        create: (_) => SocketService(),
+      ),
+    ],
       child: MaterialApp(
         debugShowCheckedModeBanner:false ,
         title: 'Flutter Demo',

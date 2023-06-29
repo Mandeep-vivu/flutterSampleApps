@@ -1,17 +1,19 @@
 import 'package:developscreens/messenger/models/message_modal.dart';
-import 'package:flutter/foundation.dart';
 
 class ChatModel{
   final int id;
+  final String personID;
   final String name;
-  final bool isGroup;
+  final String lastname;
+
   final List<MessageModel> messages;
   final String icon;
 
   ChatModel({
     required this.id,
+    required this.personID,
     required this.name,
-    required this.isGroup,
+    required this.lastname,
     required this.messages,
     required this.icon,
   });
@@ -35,22 +37,7 @@ class ChatModel{
 
   void addMessage(MessageModel message) {
     messages.add(message);
-
-  }
-  bool isDifferentMonth(DateTime dateTime) {
-    if (messages.isNotEmpty) {
-      final latestMessageMonth = latestMessageTime!.month;
-      final latestMessageYear = latestMessageTime!.year;
-      final newMessageMonth = dateTime.month;
-      final newMessageYear = dateTime.year;
-
-      return latestMessageMonth != newMessageMonth ||
-          latestMessageYear != newMessageYear;
-    }
-    return true;
-  }
-  void deleteMessages(List<MessageModel> messagesToDelete) {
-    messages.removeWhere((message) => messagesToDelete.contains(message));
+    print("hlo");
   }
 
 }
