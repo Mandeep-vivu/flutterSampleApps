@@ -46,6 +46,7 @@ class _IndividualPageState extends State<IndividualPage> {
       widget.chatModel.personID,
       authProvider.token,
     );
+    socketService.screenFunction=_scrollToBottom;
     socketService.joinSocket();
     _scrollToBottom();
     focusNode.addListener(() {
@@ -271,7 +272,7 @@ class _IndividualPageState extends State<IndividualPage> {
                             ],
                           );
                         } else {
-                          _scrollToBottom();
+
                           return buildMessageCard(message);
                         }
                       },
@@ -379,7 +380,8 @@ class _IndividualPageState extends State<IndividualPage> {
                                                   widget.chatModel.personID,
                                                   authProvider.token,
                                                 message,
-                                                  updatedChatModel
+                                                  updatedChatModel,
+
                                               );
                                             widget.updateChatModel(updatedChatModel);
                                             _controller.clear();

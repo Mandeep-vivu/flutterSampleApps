@@ -7,9 +7,10 @@ import 'messenger/models/chatmodel.dart';
 
 class SocketService with ChangeNotifier {
   static IO.Socket? socket;
+  Function? screenFunction;
   String? userId;
   String? ReuserId;
-  String toeken="";
+  String toeken = "";
   String connection_id = '';
   List<dynamic> data1 = [];
   List<ChatModel> filteredChatModels = [];
@@ -62,20 +63,6 @@ class SocketService with ChangeNotifier {
     socket!.onReconnectError((data) => print("RECONNECT-Error:$data"));
 
     socket!.on('fromServer', (_) => print(_));
-
-    try {
-      print('Socket connected: ${socket!.connected}');
-      final senderResponse = await http.get(
-        Uri.parse('http://139.59.47.49:4001/user/connections'),
-        headers: {
-          'Content-Type': 'application/json',
-          'token': token,
-        },
-      );
-      final senderData = jsonDecode(senderResponse.body);
-    } catch (e) {
-      print('Socket connection error: $e');
-    }
   }
 
   void createConnection(String senderId, String receiverId, String token) {
@@ -85,9 +72,9 @@ class SocketService with ChangeNotifier {
         'sent_to': receiverId,
         'token': token,
       };
-      userId=senderId;
-      ReuserId=receiverId;
-      toeken=token;
+      userId = senderId;
+      ReuserId = receiverId;
+      toeken = token;
       print(socket!.connected);
       socket!.emit('create_connection', data);
     }
@@ -109,9 +96,9 @@ class SocketService with ChangeNotifier {
       final String messageId = data['_id'];
       final String messageText = data['message'];
 
-      final bool isSent = (senderId == userId); // Compare senderId with your user ID
-print("userid--mine->$userId");
-print("senderid------>$senderId");
+      final bool isSent = (senderId == userId);
+      print("userid--mine->$userId");
+      print("senderid------>$senderId");
 
       final message = MessageModel(
         text: messageText,
@@ -121,11 +108,8 @@ print("senderid------>$senderId");
         mID: messageId,
       );
 
-      print(message.text);
-      print(message.isSent);
-      //final chatModel = getChatModel(ReuserId!);
-
       chatModelss.addMessage(message);
+      screenFunction?.call();
       updateChatModel(chatModelss);
       notifyListeners();
     });
@@ -147,48 +131,11 @@ print("senderid------>$senderId");
       print('API error: ${response.statusCode}');
     }
   }
+
   void markMessageAsRead(ChatModel chatModel, MessageModel message) {
     message.markAsRead();
     notifyListeners();
   }
-
-  ChatModel getChatModel(String receiverId) {
-
-    final existingChatModel = filteredChatModels.firstWhere(
-          (chat) => chat.personID == receiverId,
-      orElse: () {
-
-        final userData = data1.firstWhere((data) => data['_id'] == receiverId,
-            orElse: () => null);
-        if (userData != null) {
-          final chatModel = ChatModel(
-            id: 0, // Provide an appropriate ID for the new chat model
-            personID: receiverId,
-            name: userData['first_name']??"",
-            lastname: userData['last_name']??'',
-            messages: [],
-            icon: userData['profile_pic'] ?? '',
-          );
-          filteredChatModels.add(chatModel);
-          return chatModel;
-        } else {
-          return ChatModel(
-            id: 0, // Provide an appropriate ID
-            personID: receiverId,
-            name: '',
-            lastname: '',
-            messages: [],
-            icon: '',
-          );
-        }
-      },
-    );
-    return existingChatModel;
-  }
-
-
-
-
 
   listensocketJoin() {
     socket!.on('join_socket', (data1) {
@@ -204,9 +151,10 @@ print("senderid------>$senderId");
       socket!.emit('join_socket', data1);
     }
   }
-  void sendMessage(
-      String senderId, String receiverId, String token, String message, param4 ) {
-    chatModelss=param4;
+
+  void sendMessage(String senderId, String receiverId, String token,
+      String message, param4) {
+    chatModelss = param4;
     if (socket != null) {
       final data = {
         "sent_by": senderId,
@@ -218,28 +166,6 @@ print("senderid------>$senderId");
       socket!.emit('send_message', data);
     }
   }
-/*
-  Future<void> sendMessage(String connectionID, dynamic message, Function(dynamic) onSendMessage) async {
-    socket!.on('send_message', (payload) async {
-      try {
-socket!.on('recived_message', (data) {
-        onReceivedMessage(data);
-      });
-        var data2 = {
-          'message': message,
-        };
-        print(payload);
-        print(data2);
-        socket!.emit('send_message', data2);
-        socket!.on("send_message", (data2) {
-          onSendMessage(data2);
-        });
-      } catch (error) {
-        print(error);
-      }
-    });
-  }
-*/
 
   void disconnect() async {
     if (socket != null) {
@@ -251,5 +177,50 @@ socket!.on('recived_message', (data) {
     }
   }
 }
-
 //
+// //
+// ChatModel getChatModel(String receiverId) {
+//
+//   final existingChatModel = filteredChatModels.firstWhere(
+//         (chat) => chat.personID == receiverId,
+//     orElse: () {
+//       final userData = data1.firstWhere((data) => data['_id'] == receiverId,
+//           orElse: () => null);
+//       if (userData != null) {
+//         final chatModel = ChatModel(
+//           id: 0, // Provide an appropriate ID for the new chat model
+//           personID: receiverId,
+//           name: userData['first_name']??"",
+//           lastname: userData['last_name']??'',
+//           messages: [],
+//           icon: userData['profile_pic'] ?? '',
+//         );
+//         filteredChatModels.add(chatModel);
+//         return chatModel;
+//       } else {
+//         return ChatModel(
+//           id: 0, // Provide an appropriate ID
+//           personID: receiverId,
+//           name: '',
+//           lastname: '',
+//           messages: [],
+//           icon: '',
+//         );
+//       }
+//     },
+//   );
+//   return existingChatModel;
+// }
+/*  try {
+      print('Socket connected: ${socket!.connected}');
+      final senderResponse = await http.get(
+        Uri.parse('http://139.59.47.49:4001/user/connections'),
+        headers: {
+          'Content-Type': 'application/json',
+          'token': token,
+        },
+      );
+      final senderData = jsonDecode(senderResponse.body);
+    } catch (e) {
+      print('Socket connection error: $e');
+    }*/

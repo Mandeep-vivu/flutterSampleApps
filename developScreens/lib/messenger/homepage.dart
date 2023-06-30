@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:developscreens/messenger/profile_page.dart';
 
 import 'package:developscreens/messenger/individual_page.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+
 import 'package:developscreens/messenger/models/chatmodel.dart';
 import 'package:developscreens/provider_aut.dart';
 import 'package:flutter/material.dart';
@@ -33,33 +33,36 @@ class _HomePaState extends State<HomePa> {
   Set<int> selectedChatIds = {};
 
   bool isBottomSheetOpen = false;
-  late IO.Socket socket;
+
   @override
   void initState() {
     super.initState();
-    filteredChatModelss = chatProvider.filteredChatModels;
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     authProvider.selectContact();
     final socketService = Provider.of<SocketService>(context, listen: false);
     socketService.connect(widget.token);
     socketService.addListener(() {
-      updateChatModel(socketService.chatModelss);
+      setState(() {
+        filteredChatModelss = socketService.filteredChatModels;
+      });
     });
   }
+
   @override
   void dispose() {
-    // Clean up the listeners when the widget is disposed
     final socketService = Provider.of<SocketService>(context, listen: false);
     socketService.removeListener(() {
-      updateChatModel(socketService.chatModelss);
+      setState(() {
+        filteredChatModelss = socketService.filteredChatModels;
+      });
     });
     super.dispose();
   }
+
   void bottomsheetdata(BuildContext context) {
     isBottomSheetOpen = true;
     final authProvider1 = Provider.of<AuthProvider>(context, listen: false);
     List<dynamic> datalist = authProvider1.data;
-
     showModalBottomSheet<void>(
       enableDrag: true,
       showDragHandle: true,
@@ -77,7 +80,6 @@ class _HomePaState extends State<HomePa> {
                   contactData['first_name'] ?? contactData['phone_no'].toString();
               final String idm = contactData["_id"];
               final String lastname = contactData['last_name'] ?? " ";
-
               String imageurl = contactData['profile_pic'] ??
                   'https://loremflickr.com/320/240?random=$index';
               return Container(
@@ -95,7 +97,6 @@ class _HomePaState extends State<HomePa> {
                   subtitle: Text(contactData['email']),
                   onTap: () {
                     Navigator.pop(context); // Close the bottom sheet
-
                     Future.microtask(() {
                       String icon = imageurl;
                       int maxId = filteredChatModelss.isNotEmpty
@@ -154,7 +155,6 @@ class _HomePaState extends State<HomePa> {
   }
   void updateChatModel(ChatModel updatedChatModel) {
     setState(() {
-      // Update the filteredChatModelss list
       int index = filteredChatModelss
           .indexWhere((model) => model.id == updatedChatModel.id);
       if (index != -1) {
@@ -164,8 +164,8 @@ class _HomePaState extends State<HomePa> {
         filteredChatModelss.insert(0, updatedChatModel);
       }
     });
-
   }
+
 
   void updateFilteredChatModels(String query) {
     setState(() {

@@ -37,7 +37,5 @@ class ChatModel{
 
   void addMessage(MessageModel message) {
     messages.add(message);
-    print("hlo");
   }
-
 }

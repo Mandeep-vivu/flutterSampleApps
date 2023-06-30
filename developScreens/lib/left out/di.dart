@@ -419,14 +419,15 @@
 //
 // class SocketService with ChangeNotifier {
 //   static IO.Socket? socket;
+//   Function? screenFunction;
 //   String? userId;
 //   String? ReuserId;
-//   String toeken="";
+//   String toeken = "";
 //   String connection_id = '';
 //   List<dynamic> data1 = [];
 //   List<ChatModel> filteredChatModels = [];
-//   void updateChatModel(ChatModel updatedChatModel) {
 //
+//   void updateChatModel(ChatModel updatedChatModel) {
 //     int index = filteredChatModels
 //         .indexWhere((model) => model.id == updatedChatModel.id);
 //     if (index != -1) {
@@ -435,17 +436,11 @@
 //     } else {
 //       filteredChatModels.insert(0, updatedChatModel);
 //     }
+//     notifyListeners();
 //   }
 //
 //   late ChatModel chatModelss;
 //   void connect(String token) async {
-//     if (socket?.json.io.options.containsKey('extraHeaders') == true &&
-//         socket?.json.io.options['extraHeaders'].containsKey('token') == true &&
-//         socket?.json.io.options['extraHeaders']['token'] != token) {
-//       print("OLD Token:${socket?.json.io.options['extraHeaders']['token']}");
-//       socket?.json.io.options['extraHeaders']['token'] = token;
-//       print("NEW Token:${socket?.json.io.options['extraHeaders']['token']}");
-//     }
 //     socket = IO.io(
 //         'http://139.59.47.49:4001',
 //         IO.OptionBuilder().setTransports(['websocket']).setExtraHeaders(
@@ -455,29 +450,11 @@
 //     socket!.onError((data) => print("ERROR:$data"));
 //     socket!.connect();
 //     socket!.onConnect((d) {
-//       print(socket!.json.io.options);
-//       print("con---=-${socket!.connected}");
 //       listenCreateConnection();
 //       listenSendMessage();
-//
 //       notifyListeners();
 //     });
 //     socket!.onAny((event, data) => print("any---=-$event"));
-//
-//
-//     try {
-//       print('Socket connected: ${socket!.connected}');
-//       final senderResponse = await http.get(
-//         Uri.parse('http://139.59.47.49:4001/user/connections'),
-//         headers: {
-//           'Content-Type': 'application/json',
-//           'token': token,
-//         },
-//       );
-//       final senderData = jsonDecode(senderResponse.body);
-//     } catch (e) {
-//       print('Socket connection error: $e');
-//     }
 //   }
 //
 //   void createConnection(String senderId, String receiverId, String token) {
@@ -487,10 +464,9 @@
 //         'sent_to': receiverId,
 //         'token': token,
 //       };
-//       userId=senderId;
-//       ReuserId=receiverId;
-//       toeken=token;
-//       print(socket!.connected);
+//       userId = senderId;
+//       ReuserId = receiverId;
+//       toeken = token;
 //       socket!.emit('create_connection', data);
 //     }
 //   }
@@ -498,38 +474,8 @@
 //   listenCreateConnection() {
 //     socket!.on("create_connection", (data) async {
 //       connection_id = data['connection_id'];
-//       print("fddggfg------$connection_id");
 //     });
 //     notifyListeners();
-//   }
-//
-//   listenSendMessage() {
-//     socket!.on('recived_message', (data) {
-//       print("received---->$data");
-//       saelectContact();
-//       final String senderId = data['sent_by'];
-//       final String messageId = data['_id'];
-//       final String messageText = data['message'];
-//
-//       final bool isSent = (senderId == userId); // Compare senderId with your user ID
-//       print("userid--mine->$userId");
-//       print("senderid------>$senderId");
-//
-//       final message = MessageModel(
-//         text: messageText,
-//         time: DateTime.now(),
-//         isSent: isSent,
-//         isRead: false,
-//         mID: messageId,
-//       );
-//
-//       print(message.text);
-//       print(message.isSent);
-//
-//       chatModelss.addMessage(message);
-//       updateChatModel(chatModelss);
-//       notifyListeners();
-//     });
 //   }
 //
 //   Future<void> saelectContact() async {
@@ -542,17 +488,35 @@
 //     );
 //     if (response.statusCode == 200) {
 //       data1 = json.decode(response.body);
-//       print(data1[1]);
 //     } else {
-//       // Handle API error
 //       print('API error: ${response.statusCode}');
 //     }
 //   }
+//   listenSendMessage() {
+//     socket!.on('recived_message', (data) {
+//       saelectContact();
+//       final String senderId = data['sent_by'];
+//       final String messageId = data['_id'];
+//       final String messageText = data['message'];
+//       final bool isSent =
+//       (senderId == userId);
+//       final message = MessageModel(
+//         text: messageText,
+//         time: DateTime.now(),
+//         isSent: isSent,
+//         isRead: false,
+//         mID: messageId,
+//       );
+//       chatModelss.addMessage(message);
+//       screenFunction?.call();
+//       updateChatModel(chatModelss);
+//       notifyListeners();
+//     });
+//   }
 //
-//
-//   void sendMessage(
-//       String senderId, String receiverId, String token, String message, param4 ) {
-//     chatModelss=param4;
+//   void sendMessage(String senderId, String receiverId, String token,
+//       String message, param4) {
+//     chatModelss = param4;
 //     if (socket != null) {
 //       final data = {
 //         "sent_by": senderId,
@@ -564,7 +528,189 @@
 //       socket!.emit('send_message', data);
 //     }
 //   }
-//
 // }
+// /*
 //
+// class _HomePaState extends State<HomePa> {
+//   final SocketService chatProvider = SocketService();
+//   List<ChatModel> filteredChatModelss = [];
+//   bool isBottomSheetOpen = false;
 //
+//   @override
+//   void initState() {
+//     super.initState();
+//     filteredChatModelss = chatProvider.filteredChatModels;
+//     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+//     authProvider.selectContact();
+//     final socketService = Provider.of<SocketService>(context, listen: false);
+//     socketService.connect(widget.token);
+//     socketService.addListener(() {
+//       updateChatModel(socketService.chatModelss);
+//     });
+//   }
+//   @override
+//   void dispose() {
+//     final socketService = Provider.of<SocketService>(context, listen: false);
+//     socketService.removeListener(() {
+//       updateChatModel(socketService.chatModelss);
+//     });
+//     super.dispose();
+//   }
+//   void bottomsheetdata(BuildContext context) {
+//     isBottomSheetOpen = true;
+//     final authProvider1 = Provider.of<AuthProvider>(context, listen: false);
+//     List<dynamic> datalist = authProvider1.data;
+//     showModalBottomSheet<void>(
+//       context: context,
+//       builder: (BuildContext context) {
+//         return ListView.builder(
+//           itemCount: datalist.length,
+//           itemBuilder: (BuildContext context, int index) {
+//             final Map<String, dynamic> contactData = datalist[index];
+//             final String contactName =
+//                 contactData['first_name'] ?? contactData['phone_no'].toString();
+//             final String idm = contactData["_id"];
+//             final String lastname = contactData['last_name'] ?? " ";
+//             String imageurl = contactData['profile_pic'] ??
+//                 'https://loremflickr.com/320/240?random=$index';
+//             return ListTile(
+//               title: Text(contactName + " " + lastname),
+//               subtitle: Text(contactData['email']),
+//               onTap: () {
+//                   String icon = imageurl;
+//                   int maxId = filteredChatModelss.isNotEmpty
+//                       ? filteredChatModelss
+//                       .map((chatModel) => chatModel.id)
+//                       .reduce(max)
+//                       : 0;
+//                   ChatModel newChatModel = ChatModel(
+//                     id: maxId + 1,
+//                     personID: idm,
+//                     name: contactName,
+//                     lastname: contactData['last_name'] ?? " ",
+//                     messages: [],
+//                     icon: icon,
+//                   );
+//                   final existingChatIndex = filteredChatModelss.indexWhere(
+//                           (chatModel) =>
+//                       chatModel.personID == newChatModel.personID);
+//                   if (existingChatIndex != -1) {
+//                     ChatModel existingChatModel =
+//                     filteredChatModelss[existingChatIndex];
+//                     Navigator.push(
+//                       context,
+//                       MaterialPageRoute(
+//                         builder: (context) => IndividualPage(
+//                           chatModel: existingChatModel,
+//                           updateChatModel: updateChatModel,
+//                         ),
+//                       ),
+//                     );
+//                   } else {
+//                     updateChatModel(newChatModel);
+//                     Navigator.push(
+//                       context,
+//                       MaterialPageRoute(
+//                         builder: (context) => IndividualPage(
+//                           chatModel: newChatModel,
+//                           updateChatModel: updateChatModel,
+//                         ),
+//                       ),
+//                     );
+//                   }
+//
+//               },
+//             );
+//           },
+//         );
+//       },
+//     ).whenComplete(() {
+//       isBottomSheetOpen = false;
+//     });
+//   }
+//   void updateChatModel(ChatModel updatedChatModel) {
+//     setState(() {
+//       int index = filteredChatModelss
+//           .indexWhere((model) => model.id == updatedChatModel.id);
+//       if (index != -1) {
+//         filteredChatModelss.removeAt(index);
+//         filteredChatModelss.insert(0, updatedChatModel);
+//       } else {
+//         filteredChatModelss.insert(0, updatedChatModel);
+//       }
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Column(
+//         children: [
+//           Expanded(
+//             child: ListView.separated(
+//               itemCount: filteredChatModelss.length,
+//               itemBuilder: (context, index) => InkWell(
+//                 onTap: () {
+//                   Navigator.push(
+//                     context,
+//                     MaterialPageRoute(
+//                       builder: (context) => IndividualPage(
+//                         chatModel: filteredChatModelss[index],
+//                         updateChatModel: updateChatModel,
+//                       ),
+//                     ),
+//                   );
+//                 },
+//                 child: Column(
+//                   children: [
+//                     buildListTile(filteredChatModelss[index]),
+//                   ],
+//                 ),
+//               ),
+//               separatorBuilder: (BuildContext context, int index) =>
+//               const Divider(
+//               ),
+//             ),
+//           ),
+//         ],
+//       ),
+//       floatingActionButton: FloatingActionButton(
+//         onPressed: () async {
+//           if (!isBottomSheetOpen) {
+//             final authProvider =
+//             Provider.of<AuthProvider>(context, listen: false);
+//             if (authProvider.data.isNotEmpty) {
+//               bottomsheetdata(context);
+//             }
+//           }
+//         },
+//         child: const Icon(Icons.add),
+//       ),
+//     );
+//   }
+//
+//   ListTile buildListTile(ChatModel chatModel) {
+//     return ListTile(
+//       title: Text(
+//         "${chatModel.name} ${chatModel.lastname}",
+//       ),
+//       subtitle: Text(
+//         chatModel.messages.isNotEmpty
+//             ? chatModel.messages.last.text.trim()
+//             : "No messages",
+//       ),
+//       onTap: () {
+//           Navigator.push(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) => IndividualPage(
+//                 chatModel: chatModel,
+//                 updateChatModel: updateChatModel,
+//               ),
+//             ),
+//           );
+//       },
+//     );
+//   }
+// }
+//*/
