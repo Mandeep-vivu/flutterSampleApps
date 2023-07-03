@@ -383,6 +383,7 @@ class _IndividualPageState extends State<IndividualPage> {
                                                   updatedChatModel,
 
                                               );
+                                              _scrollToBottom();
                                             widget.updateChatModel(updatedChatModel);
                                             _controller.clear();
 
