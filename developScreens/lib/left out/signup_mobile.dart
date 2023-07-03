@@ -1635,3 +1635,131 @@
 //       );
 //     });
 //   }
+
+/*
+class IndividualPage extends StatefulWidget {
+  final ChatModel chatModel;
+  final Function(ChatModel) updateChatModel;
+
+  IndividualPage({
+    super.key,
+    required this.chatModel,
+    required this.updateChatModel,
+  });
+
+  @override
+  _IndividualPageState createState() => _IndividualPageState();
+}
+
+class _IndividualPageState extends State<IndividualPage> {
+  bool sendButton = false;
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final socketService = Provider.of<SocketService>(context, listen: false);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    socketService.createConnection(
+      authProvider.personids,
+      widget.chatModel.personID,
+      authProvider.token,
+    );
+    socketService.joinSocket();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<SocketService>(builder: (context, chatProvider, _) {
+      widget.chatModel.messages.sort((a, b) => a.time.compareTo(b.time));
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Column(
+          children: [
+            ListView.builder(
+              shrinkWrap: true,
+              controller: _scrollController,
+              itemCount: (widget.chatModel.messages.length),
+              itemBuilder: (context, index) {
+                final message = widget.chatModel.messages[index];
+                final isDifferent = isDifferentMonth(index);
+                if (isDifferent) {
+                  return Column(
+                    children: [
+                      buildMonthHeader(message.time),
+                      buildMessageCard(message),
+                    ],
+                  );
+                } else {
+                  return buildMessageCard(message);
+                }
+              },
+            ),
+            Row(
+              children: [
+                TextFormField(
+                  controller: _controller,
+                  decoration: InputDecoration(
+                    hintText: "Type a message",
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.send,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (sendButton) {
+                        sendButton = false;
+                        String message = _controller.text;
+                        ChatModel updatedChatModel =
+                            widget.chatModel;
+                        final socketService =
+                        Provider.of<SocketService>(
+                            context,
+                            listen: false);
+                        final authProvider =
+                        Provider.of<AuthProvider>(
+                            context,
+                            listen: false);
+                        socketService.sendMessage(
+                          authProvider.personids,
+                          widget.chatModel.personID,
+                          authProvider.token,
+                          message,
+                          updatedChatModel,
+                        );
+                        widget.updateChatModel(updatedChatModel);
+                        _controller.clear();
+                      }
+                    });
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+  Widget buildMessageCard(MessageModel message) {
+    return Container(
+      decoration: BoxDecoration(
+        color: message.isSelected
+            ? Colors.blue.withOpacity(0.2)
+            : Colors.transparent,
+        // Add any desired container styling for selected messages
+      ),
+      child: message.isSent
+          ? OwnMessageCard(
+        message: message.text,
+        time: DateFormat('HH:mm').format(message.time),
+      )
+          : ReplyCard(
+        message: message.text,
+        time: DateFormat('HH:mm').format(message.time),
+      ),
+    );
+  }
+}
+*/

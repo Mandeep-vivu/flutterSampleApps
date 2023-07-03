@@ -379,12 +379,9 @@ class _IndividualPageState extends State<IndividualPage> {
                                                   authProvider.personids,
                                                   widget.chatModel.personID,
                                                   authProvider.token,
-                                                message,
-                                                  updatedChatModel,
-
+                                                message
                                               );
                                               _scrollToBottom();
-                                            widget.updateChatModel(updatedChatModel);
                                             _controller.clear();
 
                                           }

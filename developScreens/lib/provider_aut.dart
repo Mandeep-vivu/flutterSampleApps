@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
-import 'messenger/models/chatmodel.dart';
 
 class AuthProvider with ChangeNotifier {
 

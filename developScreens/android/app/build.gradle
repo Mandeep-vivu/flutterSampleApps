@@ -64,6 +64,12 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    plugins {
+        id 'com.android.application'
+
+        // Add the Google services Gradle plugin
+        id 'com.google.gms.google-services'
+    }
 }
 
 flutter {
@@ -73,4 +79,6 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'com.facebook.android:facebook-login:latest.release'
+    implementation platform('com.google.firebase:firebase-bom:32.1.1')
+    implementation 'com.google.firebase:firebase-analytics'
 }

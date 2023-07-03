@@ -5,7 +5,17 @@ import 'package:developscreens/commons/resp_sizebox.dart';
 import 'package:developscreens/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:developscreens/commons/comn_ui.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+const List<String> scopes = <String>[
+  'email',
+  'https://www.googleapis.com/auth/contacts.readonly',
+];
 
+GoogleSignIn _googleSignIn = GoogleSignIn(
+  // Optional clientId
+  // clientId: 'your-client_id.apps.googleusercontent.com',
+  scopes: scopes,
+);
 class WelcomeS extends StatelessWidget {
   const WelcomeS({
     super.key,

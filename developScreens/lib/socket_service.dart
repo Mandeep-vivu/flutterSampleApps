@@ -50,6 +50,7 @@ class SocketService with ChangeNotifier {
       listenSendMessage();
       listensocketJoin();
       // listenCompleteRide();*/
+      listenIncomingmessage();
       notifyListeners();
     });
     socket!.onAny((event, data) => print("any---=-$event"));
@@ -87,7 +88,11 @@ class SocketService with ChangeNotifier {
     });
     notifyListeners();
   }
-
+listenIncomingmessage(){
+    socket!.on('chat_users', (data) {
+      print(data);
+    });
+}
   listenSendMessage() {
     socket!.on('recived_message', (data) {
       print("received---->$data");
@@ -153,8 +158,7 @@ class SocketService with ChangeNotifier {
   }
 
   void sendMessage(String senderId, String receiverId, String token,
-      String message, param4) {
-    chatModelss = param4;
+      String message) {
     if (socket != null) {
       final data = {
         "sent_by": senderId,
@@ -165,6 +169,7 @@ class SocketService with ChangeNotifier {
       };
       socket!.emit('send_message', data);
     }
+
   }
 
   void disconnect() async {
